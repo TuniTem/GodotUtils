@@ -1,0 +1,130 @@
+[gd_scene load_steps=8 format=3 uid="uid://bfxluiesgnvul"]
+
+[ext_resource type="Script" uid="uid://d0fyebpllns17" path="res://Singletons/Debug/debug.gd" id="1_324oo"]
+[ext_resource type="Texture2D" uid="uid://fvltm08ihpit" path="res://Singletons/Debug/cmd.png" id="2_1ylw2"]
+[ext_resource type="Script" uid="uid://cg4hpxqbgtk7v" path="res://Singletons/Debug/command.gd" id="2_a1gef"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kuf7p"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gtccc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2t27v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_22yn1"]
+
+[node name="Debug" type="Control" node_paths=PackedStringArray("container", "console", "console_container", "command")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_324oo")
+container = NodePath("MarginContainer/VBoxContainer")
+console = NodePath("Console/ConsoleBg/ConsoleMargins/Console")
+console_container = NodePath("Console")
+command = NodePath("Console/CommandBG/HBoxContainer/LineEdit")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+z_index = 7
+layout_mode = 1
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_constants/margin_left = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "1"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = -5
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = -5
+theme_override_constants/margin_bottom = -5
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/MarginContainer"]
+z_index = -1
+layout_mode = 2
+color = Color(0, 0, 0, 0.129412)
+
+[node name="Console" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -285.0
+offset_right = 654.0
+grow_vertical = 0
+
+[node name="ConsoleBg" type="ColorRect" parent="Console"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 10.69
+color = Color(0, 0, 0, 0.219608)
+
+[node name="ConsoleMargins" type="MarginContainer" parent="Console/ConsoleBg"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Console" type="RichTextLabel" parent="Console/ConsoleBg/ConsoleMargins"]
+layout_mode = 2
+theme_override_font_sizes/bold_italics_font_size = 10
+theme_override_font_sizes/italics_font_size = 10
+theme_override_font_sizes/mono_font_size = 10
+theme_override_font_sizes/normal_font_size = 10
+theme_override_font_sizes/bold_font_size = 10
+bbcode_enabled = true
+scroll_active = false
+scroll_following = true
+
+[node name="CommandBG" type="Panel" parent="Console"]
+z_index = -2
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_kuf7p")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Console/CommandBG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Console/CommandBG/HBoxContainer"]
+modulate = Color(1, 1, 1, 0.45098)
+custom_minimum_size = Vector2(17.64, 19.435)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("2_1ylw2")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="LineEdit" type="LineEdit" parent="Console/CommandBG/HBoxContainer" node_paths=PackedStringArray("console", "command_bg")]
+process_mode = 3
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 10
+theme_override_styles/focus = SubResource("StyleBoxEmpty_gtccc")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_2t27v")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_22yn1")
+placeholder_text = "enter a command..."
+script = ExtResource("2_a1gef")
+console = NodePath("../../../ConsoleBg/ConsoleMargins/Console")
+command_bg = NodePath("../..")
