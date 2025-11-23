@@ -44,9 +44,7 @@ func _process(delta: float) -> void:
 	TIME += delta
 	if _breathe_enabled:
 		_sim_breathe()
-		
 	
-
 # General Utility
 ## Returns a [Rect2] initialized from a [param position], and [param size]
 func rect_from_center(position : Vector2, size : Vector2) -> Rect2:
