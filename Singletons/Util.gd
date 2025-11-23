@@ -98,16 +98,16 @@ func sort_ascending(a, b, index):
 		return true
 	return false
 
-func is_alphanumeric(str : String, allowed_special_characters : String = "") -> bool:
-	var test_str : String = " abcdefghijklmnopqrstuvwxyz1234567890" + allowed_special_characters
+func is_alphanumeric(str : String, allowed_characters : String = "") -> bool:
+	var test_str : String = " abcdefghijklmnopqrstuvwxyz1234567890" + allowed_characters
 	for letter in str.to_lower():
 		if not letter in test_str:
 			return false
 	
 	return true
 
-func convert_alphanumeric(str : String, allowed_special_characters : String = "") -> String:
-	var test_str : String = " abcdefghijklmnopqrstuvwxyz1234567890" + allowed_special_characters
+func convert_alphanumeric(str : String, allowed_characters : String = "") -> String:
+	var test_str : String = " abcdefghijklmnopqrstuvwxyz1234567890" + allowed_characters
 	var out : String = ""
 	for letter in str.to_lower():
 		if letter in test_str:
@@ -116,17 +116,19 @@ func convert_alphanumeric(str : String, allowed_special_characters : String = ""
 	return out
 	
 	
-func is_numeric(str : String) -> bool:
+func is_numeric(str : String, allowed_characters : String = "") -> bool:
+	var test_str : String = "1234567890" + allowed_characters
 	for number in str.to_lower():
-		if not number in "1234567890":
+		if not number in test_str:
 			return false
 	
 	return true
 
-func convert_numeric(str : String) -> String:
+func convert_numeric(str : String, allowed_characters : String = "") -> String:
+	var test_str : String = "1234567890" + allowed_characters
 	var out : String = ""
 	for number in str.to_lower():
-		if number in "1234567890":
+		if number in test_str:
 			out += number
 	
 	return out
