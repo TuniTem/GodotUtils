@@ -6,6 +6,7 @@ const COARSE_EPSILON : float = 0.01
 const EPSILON : float  = 0.001
 const FINE_EPSILON : float  = 0.00001
 const FINEST_EPSILON : float  = 0.000000001
+
 const _EPSILON_ARR : Array = [COARSE_EPSILON, EPSILON, FINE_EPSILON, FINEST_EPSILON]
 
 enum BreatheMode {
@@ -24,6 +25,9 @@ var _breathe_properties : Dictionary[Array, Dictionary] = {}
 var _breathe_methods : Dictionary[Callable, Dictionary] = {}
 var _breathe_enabled : bool = false
 var _run_every_counts : Dictionary[Array, int]
+var _uid_generator : UniqueIdentifierGenerator = UniqueIdentifierGenerator.new()
+var _smooth_hide_colors : Dictionary[CanvasItem, Color]
+var _cooldowns : Dictionary[String, float]
 
 
 # [Object, property] : {
@@ -62,13 +66,17 @@ func get_all_children(node : Node, data : Array = []):
 ## Preforms a serach on an [Array] of [Array]s or [Dictionary]s, [param index] is the index to search in the sub-array/dictionary, [param key] is the value it's checking for.[br][br]
 ## Returns the array dictionary that has [param key] at [param index], or [param on_fail] if nothing is found.[br][br]
 ## If [param sub_key] is set, instead the value at [param sub_key] in the found sub array is returned.
-func search(array : Array, index : Variant, key : Variant, duplicate : bool = false, on_fail : Variant = null, sub_index : Variant = -1):
+func search(array : Array, index : Variant, key : Variant, duplicate : bool = false, on_fail : Variant = null, sub_key : Variant = -1, verbose : bool = false):
 	for item in array:
 		if item[index] == key:
-			if sub_index == -1:
+			if sub_key == -1:
 				return item.duplicate() if duplicate else item
 			else:
-				return item[sub_index]
+				return item[sub_key]
+	if verbose:
+		printerr("Util search error: Could not find iteration ", key, " avalable iterations printed")
+		print(array)
+		print_stack()
 	
 	return on_fail
 
@@ -86,6 +94,45 @@ func wait(time : float):
 ## Useful for awaiting multiple events simultaneously.
 func compound_signal(signals : Array[Signal], mode : Promise.Mode = Promise.Mode.ANY) -> Signal:
 	return Promise.new(signals, mode).completed
+
+func sort_ascending(a, b, index):
+	if a[index] < b[index]:
+		return true
+	return false
+
+func is_alphanumeric(str : String, allowed_special_characters : String = "") -> bool:
+	var test_str : String = " abcdefghijklmnopqrstuvwxyz1234567890" + allowed_special_characters
+	for letter in str.to_lower():
+		if not letter in test_str:
+			return false
+	
+	return true
+
+func convert_alphanumeric(str : String, allowed_special_characters : String = "") -> String:
+	var test_str : String = " abcdefghijklmnopqrstuvwxyz1234567890" + allowed_special_characters
+	var out : String = ""
+	for letter in str.to_lower():
+		if letter in test_str:
+			out += letter
+	
+	return out
+	
+	
+func is_numeric(str : String) -> bool:
+	for number in str.to_lower():
+		if not number in "1234567890":
+			return false
+	
+	return true
+
+func convert_numeric(str : String) -> String:
+	var out : String = ""
+	for number in str.to_lower():
+		if number in "1234567890":
+			out += number
+	
+	return out
+	
 
 ## Opens a file dialog and returns the selected file path and name in the format [b]\[path, file\][/b].[br][br]  
 ## Supports custom file modes, extensions, directories, and titles.[br]
@@ -136,7 +183,57 @@ func run_every(num_runs : int = 10, parent : Node = self, identifier : String = 
 		return true
 	
 	return false
-		
+
+func convert_hms(time : int) -> Array[int]:
+	var hours : int = time / 3600
+	var mins : int = (time % 3600) / 60
+	var sec : int = (time % 3600) % 60
+	
+	return [hours, mins, sec]
+
+func create_temp_unique_id() -> int:
+	return _uid_generator.create_unique_id()
+
+func hide_smooth(node : CanvasItem, time : float = 1.0, wait : bool = false, self_modulate : bool = false, fade_color : Color = Color.WHITE):
+	var tween : Tween = create_tween()
+	_smooth_hide_colors[node] = node.self_modulate if self_modulate else node.modulate
+	tween.tween_property(node, "self_modulate" if self_modulate else "modulate", Color(fade_color, 0.0), time)
+	if wait : await tween.finished
+
+func show_smooth(node : CanvasItem, time : float = 1.0, wait : bool = false, self_modulate : bool = false):
+	if (node.self_modulate.a if self_modulate else node.modulate.a) == 1.0 or not _smooth_hide_colors.has(node): return
+	var tween : Tween = create_tween()
+	tween.tween_property(node, "self_modulate" if self_modulate else "modulate", _smooth_hide_colors[node], time)
+	_smooth_hide_colors.erase(node)
+	if wait : await tween.finished
+
+func cooldown(id : String, time : float) -> bool:
+	if not _cooldowns.has(id) or TIME - _cooldowns[id] > time:
+		_cooldowns[id] = TIME
+		return true
+	
+	return false
+
+func cooldown_timeleft(id : String, time : float) -> float:
+	if _cooldowns.has(id):
+		return time - (TIME - _cooldowns[id])
+	
+	return -1.0
+
+func cooldown_timeleft_string(id : String, time : float) -> String:
+	var timeleft : int = ceil(cooldown_timeleft(id, time))
+	print(timeleft)
+	if timeleft == -1.0: return "Unknown"
+	if timeleft < 0: timeleft = 0
+	
+	var converted : Array[int] = convert_hms(timeleft)
+	
+	return (
+		("" if converted[0] == 0 else str(converted[0]) + "h ") +
+		("" if converted[1] == 0 else str(converted[1]) + "m ") +
+		str(converted[2]) + "s"
+	)
+
 
 # Input Groups
 func set_input_group(to : String):
