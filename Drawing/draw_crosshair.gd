@@ -77,6 +77,8 @@ func _process(delta: float) -> void:
 	
 	if AUTO_CENTER:
 		position = get_viewport_rect().size / 2.0
+	else:
+		position = Vector2.ZERO
 	
 	curr_color = curr_color.lerp(COLOR, delta * FLASH_SPEED)
 	queue_redraw()

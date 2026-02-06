@@ -115,7 +115,7 @@ texture = ExtResource("2_1ylw2")
 expand_mode = 3
 stretch_mode = 5
 
-[node name="LineEdit" type="LineEdit" parent="Console/CommandBG/HBoxContainer" unique_id=1485987589 node_paths=PackedStringArray("console", "command_bg")]
+[node name="LineEdit" type="LineEdit" parent="Console/CommandBG/HBoxContainer" unique_id=1485987589 node_paths=PackedStringArray("console", "command_bg", "command_list")]
 process_mode = 3
 layout_mode = 2
 size_flags_horizontal = 3
@@ -128,5 +128,6 @@ placeholder_text = "enter a command..."
 script = ExtResource("2_a1gef")
 console = NodePath("../../../ConsoleBg/ConsoleMargins/Console")
 command_bg = NodePath("../..")
+command_list = NodePath("CommandList")
 
 [node name="CommandList" type="Node" parent="Console/CommandBG/HBoxContainer/LineEdit" unique_id=1526775694]
