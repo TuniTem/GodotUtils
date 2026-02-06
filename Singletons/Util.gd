@@ -140,7 +140,7 @@ func convert_numeric(str : String, allowed_characters : String = "") -> String:
 ## Returns [code]["", ""][/code] if canceled or no valid file is selected.
 func open_file_dialog(parent : Node, type : FileDialog.FileMode = FileDialog.FileMode.FILE_MODE_OPEN_FILE, extentions : PackedStringArray = [], directory : String = "last", title : String = ""):
 	var dialog : FileDialog = FileDialog.new()
-	dialog.access =FileDialog.ACCESS_FILESYSTEM
+	dialog.access = FileDialog.ACCESS_FILESYSTEM
 	if directory == "last": 
 		dialog.current_path = File.load_var("last_dir", "C:/")
 	else :

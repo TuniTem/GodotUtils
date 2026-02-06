@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://dwepxinb1ul58"]
+
+[ext_resource type="Script" uid="uid://xco56tvgs6j5" path="res://GodotUtils/Nodes/AudioImplementation/door_audio.gd" id="1_a3gnk"]
+[ext_resource type="Script" uid="uid://b3ysetbg00u5d" path="res://GodotUtils/Nodes/AudioImplementation/volume_property.gd" id="2_ownji"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_q07p6"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_an7u5"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_mbb6e"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_dw5do"]
+
+[node name="DoorAudio" type="Node" unique_id=1731884975]
+script = ExtResource("1_a3gnk")
+
+[node name="SqueekSet1" type="AudioStreamPlayer" parent="." unique_id=831562585]
+stream = SubResource("AudioStreamRandomizer_q07p6")
+volume_db = -17.565
+script = ExtResource("2_ownji")
+vol_modifier = 0.5
+
+[node name="SqueekSet2" type="AudioStreamPlayer" parent="." unique_id=763352838]
+stream = SubResource("AudioStreamRandomizer_an7u5")
+volume_db = -19.685
+script = ExtResource("2_ownji")
+vol_modifier = 0.5
+
+[node name="Bump1" type="AudioStreamPlayer" parent="." unique_id=1321570792]
+stream = SubResource("AudioStreamRandomizer_mbb6e")
+script = ExtResource("2_ownji")
+vol_modifier = 0.1
+
+[node name="Bump2" type="AudioStreamPlayer" parent="." unique_id=2121851722]
+stream = SubResource("AudioStreamRandomizer_dw5do")
+script = ExtResource("2_ownji")
+vol_modifier = 0.1

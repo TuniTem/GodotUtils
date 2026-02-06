@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://cohgionyqkeuh"]
+
+[ext_resource type="Script" uid="uid://uae21eo1qy7l" path="res://GodotUtils/Nodes/AudioImplementation/rigidbody_audio.gd" id="1_qgqas"]
+[ext_resource type="Script" uid="uid://b3ysetbg00u5d" path="res://GodotUtils/Nodes/AudioImplementation/volume_property.gd" id="2_yqapx"]
+
+[node name="ObjectAudio" type="Node" unique_id=1265443224 groups=["ObjectAudio"]]
+script = ExtResource("1_qgqas")
+
+[node name="HeavyFall" type="AudioStreamPlayer" parent="." unique_id=1425054048]
+script = ExtResource("2_yqapx")
+
+[node name="LightFall" type="AudioStreamPlayer" parent="." unique_id=94656887]
+script = ExtResource("2_yqapx")
+
+[node name="Drag" type="AudioStreamPlayer" parent="." unique_id=1647182702]
+script = ExtResource("2_yqapx")
+
+[node name="LightBump" type="AudioStreamPlayer" parent="." unique_id=1150788433]
+script = ExtResource("2_yqapx")
+
+[node name="HeavyBump" type="AudioStreamPlayer" parent="." unique_id=331865955]
+script = ExtResource("2_yqapx")

@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://by00vo6xb8e8u"]
+
+[ext_resource type="Script" uid="uid://ckyuojm3gepja" path="res://GodotUtils/Nodes/AudioImplementation/progress_audio.gd" id="1_0g23a"]
+
+[node name="ProgressAudio" type="Node" unique_id=635896387]
+script = ExtResource("1_0g23a")
+
+[node name="forward" type="AudioStreamPlayer" parent="." unique_id=1820045340]
+volume_db = -80.0
+pitch_scale = 0.5
+
+[node name="backwards" type="AudioStreamPlayer" parent="." unique_id=359901315]
+volume_db = -80.0
+pitch_scale = 0.5
+
+[node name="hum" type="AudioStreamPlayer" parent="." unique_id=527761171]
+pitch_scale = 0.27
+autoplay = true
+
+[node name="ambient" type="AudioStreamPlayer" parent="." unique_id=635539452]
+volume_db = -20.8
+pitch_scale = 0.82
+autoplay = true
+
+[node name="start" type="Marker3D" parent="." unique_id=351972713]
+
+[node name="end" type="Marker3D" parent="." unique_id=314157197]
