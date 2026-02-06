@@ -17,16 +17,15 @@ class_name DrawCrosshair extends Node2D
 	set(val):
 		if FREE_ROTATION != val: FREE_ROTATION = val
 		ROTATION = val
-		rotation_degrees = ROTATION + DEFAULT_ROTATION
+		rotation_degrees = ROTATION
 @export_range(0.0, 360.0) var FREE_ROTATION : float = 0.0:
 	set(val):
 		FREE_ROTATION = val
 		if ROTATION != val: ROTATION = val
-		rotation_degrees = ROTATION + DEFAULT_ROTATION
+		rotation_degrees = ROTATION
 @export var LINE_THICKNESS : int = -1
 @export var TRANSITION_SPEED : float = 1.0
 @export var TRANSITION_CURVE : Curve
-@export var DEFAULT_ROTATION : float = 1.3
 @export var run_anims : bool = true
 
 @export_category("crosshair")
