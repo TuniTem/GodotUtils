@@ -20,3 +20,6 @@ project.godot
 .editorconfig
 *.uid
 *.import
+
+# Template Ignores
+Singletons/Debug/command_list.gd

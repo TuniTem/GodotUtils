@@ -1,9 +1,10 @@
 extends LineEdit
 
-const commands = []
-
 @export var console : RichTextLabel
 @export var command_bg : Panel
+@export var command_list : Node
+
+const COMMAND_LIST_SCRIPT : Script = preload("res://GodotUtils/Singletons/Debug/command_list.gd") # if this errs please run the bat file located at GodotUtils/Singletons/Debug/CreateDebugCommandTemplates.bat
 
 # history
 const MAX_STORED_HISTORY = 10
@@ -15,7 +16,10 @@ var autocomplete_matches: Array = []
 var autocomplete_matches_hist: Array = []
 
 func _ready() -> void:
+	command_list.set_script(COMMAND_LIST_SCRIPT)
+	
 	write_history = File.load_var("write_history", [])
+	
 
 func _process(delta):
 	if has_focus():
@@ -77,8 +81,7 @@ func process_input(input : String):
 	File.save_var("write_history", write_history)
 	var args = input.split(" ")
 	
-	if commands.has(args[0]):
-		
+	if command_list.list.has(args[0]):
 		run_cmd(args)
 	
 	else:
@@ -86,24 +89,22 @@ func process_input(input : String):
 
 func invalid_arguments(): Debug.push("Invalid arguments", Debug.ALERT)
 func run_cmd(cmd : Array):
-	match cmd[0]: # ADD COMMAND RUN LOGIC HERE
-		"": pass
-		
+	var command_header = cmd.pop_front()
+	command_list.commands[command_header]["execute"].call(cmd)
+	
+	
 
 func autocomplete():
 	var words = text.split(" ")
 	var suggestions: Array
 	if autocomplete_matches == []:
 		if words.size() > 1:
-			match words[0]: # ADD COMMAND AUTOCOMPLETE SUGGESTIONS HERE, SEE EXAMPLES
-				#"item":
-					#suggestions = Global.item_holder.ITEMS
-				#"machine":
-					#suggestions = Global.machine_holder.MACHINE_NAMES
-				_:
-					suggestions = []
+			if command_list.list.has(words[0]):
+				suggestions = command_list.commands[words[0]]["autocomplete"].call(words[-1])
+			else:
+				suggestions = []
 		else:
-			suggestions = commands
+			suggestions = command_list.commands_list
 		
 		if words[-1] != "":
 			autocomplete_matches = suggestions.filter(func(s): return s.to_lower().find(words[-1].to_lower()) >= 0).duplicate()

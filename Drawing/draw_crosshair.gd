@@ -10,6 +10,7 @@ class_name DrawCrosshair extends Node2D
 @export var dot : bool 
 
 @export_category("general")
+@export var AUTO_CENTER : bool = false
 @export var COLOR : Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var FLASH_COLOR : Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var FLASH_SPEED : float = 1.0
@@ -73,6 +74,9 @@ func _process(delta: float) -> void:
 			transitions[key] = lerp(transitions[key], float(get(key)), delta * TRANSITION_SPEED)
 			if abs(transitions[key] - float(get(key))) < Util.EPSILON:
 				transitions[key] = float(get(key))
+	
+	if AUTO_CENTER:
+		position = get_viewport_rect().size / 2.0
 	
 	curr_color = curr_color.lerp(COLOR, delta * FLASH_SPEED)
 	queue_redraw()
