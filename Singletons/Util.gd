@@ -184,6 +184,7 @@ func run_every(num_runs : int = 10, parent : Node = self, identifier : String = 
 	
 	return false
 
+
 func convert_hms(time : int) -> Array[int]:
 	var hours : int = time / 3600
 	var mins : int = (time % 3600) / 60
@@ -206,6 +207,11 @@ func show_smooth(node : CanvasItem, time : float = 1.0, wait : bool = false, sel
 	tween.tween_property(node, "self_modulate" if self_modulate else "modulate", _smooth_hide_colors[node], time)
 	_smooth_hide_colors.erase(node)
 	if wait : await tween.finished
+
+func tween(object : Object, property : NodePath, final_val : Variant, time : float, easing : Tween.EaseType = Tween.EASE_IN, trans : Tween.TransitionType = Tween.TRANS_LINEAR, delay : float = 0.0) -> Tween:
+	var _tween : Tween = create_tween()
+	_tween.tween_property(object, property, final_val, time).set_ease(easing).set_trans(trans).set_delay(delay)
+	return _tween
 
 func cooldown(id : String, time : float) -> bool:
 	if not _cooldowns.has(id) or TIME - _cooldowns[id] > time:
