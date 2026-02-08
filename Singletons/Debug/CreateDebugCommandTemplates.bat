@@ -1,4 +1,5 @@
 @echo off
+cd ../../../
 IF EXIST command_list.gd goto :eof
 >>command_list.gd echo extends Object
 >>command_list.gd echo.

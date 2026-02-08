@@ -1,6 +1,8 @@
-@tool
 extends Node
 ## Singleton used to extend godot's features
+
+
+
 
 const COARSE_EPSILON : float = 0.01
 const EPSILON : float  = 0.001
@@ -9,12 +11,22 @@ const FINEST_EPSILON : float  = 0.000000001
 
 const _EPSILON_ARR : Array = [COARSE_EPSILON, EPSILON, FINE_EPSILON, FINEST_EPSILON]
 
+
 enum BreatheMode {
 	ADD,
 	MULTIPLY
 }
 
+enum RayMode {
+	OBJECT,
+	POINT,
+	NORMAL,
+	IS_COLLIDING
+}
+
 signal input_group_changed(to : String)
+
+@export var ref_3d: Node3D
 
 var TIME : float = 0.0
 var active_promises : Array[Promise]
@@ -60,6 +72,19 @@ func get_all_children(node : Node, data : Array = []):
 		data = get_all_children(child, data)
 	
 	return data
+
+func find_file_at_dir(path : String, file_name : String) -> String:
+	if not path.ends_with("/") : path += "/"
+	if DirAccess.get_files_at(path).has(file_name):
+		return path + file_name
+	
+	var directories : PackedStringArray = DirAccess.get_directories_at(path)
+	for directory : String in directories:
+		var file : String = find_file_at_dir(path + directory, file_name)
+		if file.ends_with(file_name): 
+			return file
+	
+	return ""
 
 ## Preforms a serach on an [Array] of [Array]s or [Dictionary]s, [param index] is the index to search in the sub-array/dictionary, [param key] is the value it's checking for.[br][br]
 ## Returns the array dictionary that has [param key] at [param index], or [param on_fail] if nothing is found.[br][br]
@@ -249,6 +274,125 @@ func set_input_group(to : String):
 func is_current_input_group(_input_group : String):
 	return input_group == _input_group
 
+# Aim Assist
+func predict_intercept(projectile_global_position : Vector3, projectile_speed : float, target_global_position : Vector3, target_velocity : Vector3) -> Vector3:
+	var time : float = projectile_global_position.distance_to(target_global_position) / projectile_speed # assume that the goal is near enough to the current position not to matter
+	var ahead_point : Vector3 = target_global_position + target_velocity * time
+	return projectile_global_position.direction_to(ahead_point)
+
+func projectile_aim_assist3d(
+	target_global_positions : Array[Vector3],
+	target_global_velocities : Array[Vector3],
+	projectile_global_position : Vector3, 
+	projectile_inital_direction : Vector3, 
+	projectile_speed : float, 
+	max_pull_angle_degrees : float, 
+	raycast_visibility_check : bool = false,
+	direct_lock_multiplier : float = 0.0,  
+	correction_curve : Curve = null
+) -> Vector3:
+	assert(target_global_positions.size() == target_global_velocities.size(), "positions and velocities must have the same number of entries")
+	var intercepts : Array[Array]
+	
+	# get intercepts of each target
+	for target : int in range(target_global_positions.size()):
+		# predict_intercept calcs the direction to the expected position of the target by the time a bullet would get there
+		intercepts.append([predict_intercept(projectile_global_position, projectile_speed, target_global_positions[target], target_global_velocities[target]), 1.0, target_global_positions[target] - projectile_global_position])
+		# add weak positions to lock directly to people
+		intercepts.append([projectile_global_position.direction_to(target_global_positions[target]), direct_lock_multiplier, target_global_positions[target] - projectile_global_position])
+	
+	var canidates : Array[Dictionary]
+	for intercept : Array in intercepts:
+		if intercept[1] != 0.0:
+			# y-yeah, I use dot products in my code, its no biggie
+			var difference_degrees : float = (1 - projectile_inital_direction.dot(intercept[0])) * 90.0
+			# most of the checks to narrow down targets are done here
+			if difference_degrees < max_pull_angle_degrees * intercept[1] \
+			and (\
+				not raycast_visibility_check \
+				or not shoot_raycast3d_global(projectile_global_position, intercept[2], RayMode.IS_COLLIDING, false, false, false, true, Global.players, true)
+			):
+				canidates.append({
+					"intercept_direction" : intercept[0], 
+					"pull_multiplier" : intercept[1],
+					"difference_degrees" : difference_degrees
+				})
+	
+	# if no nearby targets are found then return the original direction vector 
+	if canidates.size() == 0: 
+		return projectile_inital_direction
+	
+	
+	if correction_curve == null:
+		# snap to nearest point, accounting for each one's pull mutiplier
+		var choice: Vector3
+		var best : float = INF
+		for canidate : Dictionary in canidates:
+			if canidate["difference_degrees"] * canidate["pull_multiplier"] < best:
+				choice = canidate["intercept_direction"]
+				best = canidate["difference_degrees"] * canidate["pull_multiplier"]
+		
+		return choice
+	
+	else:
+		# slowly latch onto each point based on the correction curve graph
+		var choice: Dictionary
+		var best : float = INF
+		for canidate : Dictionary in canidates:
+			var modified_pull : float = correction_curve.sample(1.0 - clamp(canidate["difference_degrees"] / max_pull_angle_degrees, 0.0, 1.0))# * max_pull_angle_degrees
+			if modified_pull < best:
+				best = modified_pull
+				choice = canidate
+		
+		
+		# Pull the original direction towards intercept, aim assist! 
+		var adjusted_vector : Vector3 = projectile_inital_direction.slerp(choice["intercept_direction"], 1.0-best) # (choice["intercept_direction"] * intercept_weight + projectile_inital_direction).normalized()
+		return adjusted_vector
+	
+
+
+
+func shoot_raycast3d_global(
+	from : Vector3, 
+	to: Vector3, 
+	mode : RayMode = RayMode.OBJECT, 
+	collide_inside : bool = false,
+	hit_backfaces : bool = true,
+	collide_with_areas : bool = false,
+	collide_with_bodies : bool = true,
+	exclude_nodes : Array = [],
+	debug_draw_vector : bool = false
+) -> Variant:
+	
+	var space_state = ref_3d.get_world_3d().direct_space_state
+	var raycast = PhysicsRayQueryParameters3D.create(from, to)
+	var exclude : Array[RID] = []
+	for node : CollisionObject3D in exclude_nodes:
+		exclude.append(node.get_rid())
+		
+	raycast.exclude = exclude
+	raycast.hit_from_inside = collide_inside
+	raycast.hit_back_faces = hit_backfaces
+	raycast.collide_with_areas = collide_with_areas
+	raycast.collide_with_bodies = collide_with_bodies
+	
+	if debug_draw_vector : Debug.draw_vector3(to, from)
+	
+	var result : Dictionary = space_state.intersect_ray(raycast)
+	print(result)
+	if result != {}:
+		match mode:
+			RayMode.OBJECT: return result["collider"]
+			RayMode.POINT: return result["position"]
+			RayMode.IS_COLLIDING: 
+				return true
+			
+		printerr("Ray mode not found")
+		return null
+	
+	elif mode == RayMode.IS_COLLIDING: return false
+	else: return null
+	
 
 # Breathing variables
 

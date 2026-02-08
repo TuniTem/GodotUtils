@@ -19,6 +19,8 @@ enum {
 var line_count = 0
 var console_fade_timer = 0.0
 
+var debug_mode : bool = false
+
 var TAGS = [
 	[DEFAULT, Color(1,1,1,0.5).to_html()], 
 	[WARN, Color(1,1,0).to_html()], 
@@ -45,7 +47,16 @@ var tracked_values : Array = [
 # 4 param name in case of non-Callable : String]
 
 
+const DEBUG_VECTOR_MATERIAL = preload("res://GodotUtils/Singletons/Debug/debug_vector_material.tres")
+@export var debug_vector_holder: Node3D
+var debug_vector3 : Dictionary[Array, MeshInstance3D]
+
+
+func _init() -> void:
+	debug_mode = not OS.has_feature("standalone")
+
 func _ready():
+	Debug.process_mode = Node.PROCESS_MODE_ALWAYS
 	_update_list()
 	hide()
 	
@@ -135,6 +146,83 @@ func push(item, tag := DEFAULT):
 	console_fade_timer = 0.0
 
 
+
+func draw_vector3(end : Vector3, start : Vector3 = Vector3.ZERO, node : Node = self, identifier : Variant = "", color : Color = Color.RED):
+	if not debug_mode: return
+	var mesh : ImmediateMesh
+	if debug_vector3.has([node, identifier]) and not identifier == "":
+		mesh = debug_vector3[[node, identifier]].mesh
+		
+	else:
+		var new_mesh = MeshInstance3D.new()
+		new_mesh.mesh = ImmediateMesh.new()
+		new_mesh.set_material_override(DEBUG_VECTOR_MATERIAL.duplicate())
+		new_mesh.material_override.albedo_color = color
+		debug_vector_holder.add_child(new_mesh)
+		#print("create new vector: ", identifier, " " , end)
+		
+		mesh = new_mesh.mesh
+		debug_vector3[[node, identifier]] = new_mesh
+		
+	
+	mesh.clear_surfaces()
+	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	mesh.surface_add_vertex(start)
+	mesh.surface_add_vertex(start + end)
+	mesh.surface_end()
+	
+	
+
+func clean_vector3(parent : Object, identifier : Variant = ""):
+	if debug_vector3.has([parent, identifier]):
+		var mesh : MeshInstance3D= debug_vector3[[parent, identifier]]
+		if is_instance_valid(mesh): mesh.queue_free()
+		debug_vector3.erase([parent, identifier])
+
+func clean_all_vectors():
+	debug_vector3.clear()
+	for child in debug_vector_holder.get_children():
+		child.queue_free()
+
+func set_game_pause(to : bool):
+	get_tree().paused = to
+
+var camera : FreeLookCamera 
+
+func set_freecam(to : bool):
+	if to:
+		Debug.push("enabled freecam", Debug.INFO)
+		var old_camera : Camera3D = get_viewport().get_camera_3d()
+		var pos : Vector3 = old_camera.global_position
+		var rot : Vector3 = old_camera.global_rotation
+		var fov : float = old_camera.fov
+		camera = FreeLookCamera.new()
+		
+		set_game_pause(true)
+		add_child(camera)
+		camera.global_position = pos
+		#camera.global_rotation = rot
+		camera.fov = fov
+		camera.current = true
+	
+	else:
+		Debug.push("disabled freecam", Debug.INFO)
+		if is_instance_valid(camera):
+			camera.queue_free()
+			camera = null
+			
+		set_game_pause(false)
+		
+		
+
+
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("console"):
-		console_fade_timer = 0.0
+	if not Debug.debug_mode: return
+	
+	if event is InputEventKey and event.is_pressed():
+		match event.keycode:
+			KEY_BRACERIGHT:
+				clean_all_vectors()
+			KEY_BACKSLASH:
+				set_freecam(not is_instance_valid(camera))
+					

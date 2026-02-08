@@ -8,7 +8,7 @@ class_name ProgressAudio
 # Created May 10, 2023, used in The Abstraction 
 # (kinda) Refactored and commented Feb 6, 2026
 
-@export var disable_threshold : float = 0.99 # when the progress auido will automatically cutout to prevent a clip
+@export var disable_threshold : float = 0.99 # when the progress auido will automatically fade out to prevent a clip
 @export var manual_progress : bool = false # using the [progress] property
 @export var track_object : Node # object to track the progress of between start and end, does nothing if manual progress is enabled
 

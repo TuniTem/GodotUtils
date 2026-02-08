@@ -4,8 +4,6 @@ extends LineEdit
 @export var command_bg : Panel
 @export var command_list : Node
 
-const COMMAND_LIST_SCRIPT : Script = preload("res://GodotUtils/Singletons/Debug/command_list.gd") # if this errs please run the bat file located at GodotUtils/Singletons/Debug/CreateDebugCommandTemplates.bat
-
 # history
 const MAX_STORED_HISTORY = 10
 var write_history : Array = []
@@ -16,7 +14,24 @@ var autocomplete_matches: Array = []
 var autocomplete_matches_hist: Array = []
 
 func _ready() -> void:
-	command_list.set_script(COMMAND_LIST_SCRIPT)
+	if not Debug.debug_mode: return
+
+	Debug.console_fade_timer = 0.0
+	Debug.push("Debug mode enabled", Debug.INFO)
+	var file_location : String = File.load_var("debug_file_location", "")
+	
+	if file_location == "" or not FileAccess.file_exists(file_location):
+		file_location = Util.find_file_at_dir("res://", "command_list.gd")
+		if file_location != "":
+			File.save_var("debug_file_location", file_location)
+		else:
+			var file := FileAccess.open(DEFAULT_COMMAND_LIST_LOCATION, FileAccess.WRITE)
+			file.store_string(COMMAND_LIST_SCRIPT)
+			file.close()
+			print("Created command_list.gd file at \"res://command_list.gd\", you can edit it to add custom commands to the debugger, you may also move it to any location after running this project again")
+			get_tree().quit()
+	
+	command_list.set_script(load(file_location))
 	
 	write_history = File.load_var("write_history", [])
 	
@@ -27,12 +42,15 @@ func _process(delta):
 		
 
 func _input(event):
-	if event.is_action_pressed("console"): 
+	if not Debug.debug_mode or not event is InputEventKey or not event.is_pressed(): return
+	if event.keycode == KEY_ENTER: 
 		Util.set_input_group("console")
+		Debug.console_fade_timer = 0.0
+		Debug.set_game_pause(true)
 		Debug.show()
 	
 	if not Util.is_current_input_group("console"): return
-	if event.is_action_pressed("console"):
+	if event.keycode == KEY_ENTER:
 		if not has_focus(): 
 			command_bg.show()
 			call_deferred("grab_focus")
@@ -41,27 +59,28 @@ func _input(event):
 			Util.set_input_group("default")
 			if text != "":
 				command_bg.hide()
+				Debug.set_game_pause(false)
 				process_input(text)
 				clear()
 	
 	
 	if has_focus():
 		if write_history.size() > 0:
-			if event.is_action_pressed("last_cmd"):
+			if event.keycode == KEY_UP:
 				write_history_curr_index -= 1
 				if write_history_curr_index < 0:
 					write_history_curr_index = write_history.size() - 1
 				
 				write(write_history[write_history_curr_index])
 					
-			elif event.is_action_pressed("next_cmd"):
+			elif event.keycode == KEY_DOWN:
 				write_history_curr_index += 1
 				if write_history_curr_index > write_history.size() - 1:
 					write_history_curr_index = 0
 				
 				write(write_history[write_history_curr_index])
 				
-			elif event.is_action_pressed("autocomplete"):
+			elif event.keycode == KEY_TAB:
 				autocomplete()
 			
 			elif event is InputEventKey and event.pressed:
@@ -104,7 +123,7 @@ func autocomplete():
 			else:
 				suggestions = []
 		else:
-			suggestions = command_list.commands_list
+			suggestions = command_list.list
 		
 		if words[-1] != "":
 			autocomplete_matches = suggestions.filter(func(s): return s.to_lower().find(words[-1].to_lower()) >= 0).duplicate()
@@ -122,3 +141,30 @@ func autocomplete():
 		else: out += word
 	
 	write(out)
+
+
+const COMMAND_LIST_SCRIPT : String = """
+extends Object
+
+var list : Array[String]:
+	get(): return commands.keys()
+
+var commands : Dictionary[String, Dictionary] = {
+	"help" : {
+		"execute" : 
+			func(_args : Array):
+				Debug.push("List of avalable commands:", Debug.INFO)
+				for command in list:
+					Debug.push("\\t"+command, Debug.INFO)
+,
+		"autocomplete": 
+			func(_last_word : String):
+				match _last_word:
+					#"item": return Global.ITEM_LIST
+					_: return []
+,
+	}
+}
+
+"""
+const DEFAULT_COMMAND_LIST_LOCATION = "res://command_list.gd"

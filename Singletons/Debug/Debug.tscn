@@ -13,7 +13,7 @@ bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gtccc"]
 
-[node name="Debug" type="Control" unique_id=638180477 node_paths=PackedStringArray("container", "console", "console_container", "command")]
+[node name="Debug" type="Control" unique_id=638180477 node_paths=PackedStringArray("container", "console", "console_container", "command", "debug_vector_holder")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,6 +25,7 @@ container = NodePath("MarginContainer/VBoxContainer")
 console = NodePath("Console/ConsoleBg/ConsoleMargins/Console")
 console_container = NodePath("Console")
 command = NodePath("Console/CommandBG/HBoxContainer/LineEdit")
+debug_vector_holder = NodePath("DebugVectorHolder")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1171674641]
 z_index = 7
@@ -131,3 +132,5 @@ command_bg = NodePath("../..")
 command_list = NodePath("CommandList")
 
 [node name="CommandList" type="Node" parent="Console/CommandBG/HBoxContainer/LineEdit" unique_id=1526775694]
+
+[node name="DebugVectorHolder" type="Node3D" parent="." unique_id=1358719959]

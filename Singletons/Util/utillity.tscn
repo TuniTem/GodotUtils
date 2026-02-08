@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://dhqqejsdf4hqa"]
+
+[ext_resource type="Script" uid="uid://sr85jtclggb8" path="res://GodotUtils/Singletons/Util/Util.gd" id="1_cdiel"]
+
+[node name="Utillity" type="Node" unique_id=1522769427 node_paths=PackedStringArray("ref_3d")]
+script = ExtResource("1_cdiel")
+ref_3d = NodePath("Ref3D")
+
+[node name="Ref3D" type="Node3D" parent="." unique_id=326734859]
+unique_name_in_owner = true
