@@ -73,6 +73,10 @@ func get_all_children(node : Node, data : Array = []):
 	
 	return data
 
+func randf_array(betwixt : Array):
+	assert(betwixt.size() == 2, "pls size 2")
+	return randf_range(betwixt[0], betwixt[1])
+
 func find_file_at_dir(path : String, file_name : String) -> String:
 	if not path.ends_with("/") : path += "/"
 	if DirAccess.get_files_at(path).has(file_name):

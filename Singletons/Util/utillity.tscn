@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dhqqejsdf4hqa"]
 
-[ext_resource type="Script" uid="uid://sr85jtclggb8" path="res://GodotUtils/Singletons/Util/Util.gd" id="1_cdiel"]
+[ext_resource type="Script" uid="uid://bmosmc3hxh233" path="res://GodotUtils/Singletons/Util/Util.gd" id="1_cdiel"]
 
 [node name="Utillity" type="Node" unique_id=1522769427 node_paths=PackedStringArray("ref_3d")]
 script = ExtResource("1_cdiel")

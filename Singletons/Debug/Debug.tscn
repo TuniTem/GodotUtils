@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bfxluiesgnvul"]
 
-[ext_resource type="Script" uid="uid://bhgd06734wyy6" path="res://GodotUtils/Singletons/Debug/debug.gd" id="1_324oo"]
-[ext_resource type="Texture2D" uid="uid://bsnq0civi8tlf" path="res://GodotUtils/Singletons/Debug/cmd.png" id="2_1ylw2"]
-[ext_resource type="Script" uid="uid://dvl528myg6ihy" path="res://GodotUtils/Singletons/Debug/command.gd" id="2_a1gef"]
+[ext_resource type="Script" uid="uid://7a8pigy38qsx" path="res://GodotUtils/Singletons/Debug/debug.gd" id="1_324oo"]
+[ext_resource type="Texture2D" uid="uid://na3ogdrl7st" path="res://GodotUtils/Singletons/Debug/cmd.png" id="2_1ylw2"]
+[ext_resource type="Script" uid="uid://bu6bkki3guqh6" path="res://GodotUtils/Singletons/Debug/command.gd" id="2_a1gef"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kuf7p"]
 bg_color = Color(0, 0, 0, 1)

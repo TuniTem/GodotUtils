@@ -41,9 +41,9 @@ func _process(delta):
 		Debug.console_fade_timer = 0.0
 		
 
-func _input(event):
+func _input(event : InputEvent):
 	if not Debug.debug_mode or not event is InputEventKey or not event.is_pressed(): return
-	if event.keycode == KEY_ENTER: 
+	if event.keycode == KEY_ENTER and event.keyci: 
 		Util.set_input_group("console")
 		Debug.console_fade_timer = 0.0
 		Debug.set_game_pause(true)
