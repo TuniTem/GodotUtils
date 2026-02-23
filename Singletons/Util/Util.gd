@@ -77,6 +77,12 @@ func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randf_range(betwixt[0], betwixt[1])
 
+func rand_bool() -> bool:
+	return randi_range(0, 1) == 1
+
+func rand_on_unit_sphere() -> Vector3:
+	return Vector3(randfn(0, 1), randfn(0, 1), randfn(0, 1)).normalized()
+
 func find_file_at_dir(path : String, file_name : String) -> String:
 	if not path.ends_with("/") : path += "/"
 	if DirAccess.get_files_at(path).has(file_name):
@@ -113,8 +119,8 @@ func between(value : Variant, lower : Variant, upper : Variant) -> bool:
 
 ## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
 func wait(time : float):
-	await get_tree().create_timer(time).timeout
-	return
+	return get_tree().create_timer(time).timeout
+	#return
 
 ## Combines an [Array] of [Signal]s into a single signal using a [Promise].[br][br]
 ## The returned signal emits when the specified [param mode] condition is met (when any or all signals complete).  
