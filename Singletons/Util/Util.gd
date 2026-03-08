@@ -320,7 +320,7 @@ func projectile_aim_assist3d(
 			if difference_degrees < max_pull_angle_degrees * intercept[1] \
 			and (\
 				not raycast_visibility_check \
-				or not shoot_raycast3d_global(projectile_global_position, intercept[2], RayMode.IS_COLLIDING, false, false, false, true, Global.players, true)
+				#or not shoot_raycast3d_global(projectile_global_position, intercept[2], RayMode.IS_COLLIDING, false, false, false, true, Global.players, true)
 			):
 				canidates.append({
 					"intercept_direction" : intercept[0], 
@@ -386,7 +386,7 @@ func shoot_raycast3d_global(
 	raycast.collide_with_areas = collide_with_areas
 	raycast.collide_with_bodies = collide_with_bodies
 	
-	if debug_draw_vector : Debug.draw_vector3(to, from)
+	#if debug_draw_vector : Debug.draw_vector3(to, from)
 	
 	var result : Dictionary = space_state.intersect_ray(raycast)
 	print(result)
