@@ -34,8 +34,8 @@ func _ready():
 func _physics_process(delta):
 	if not disable:
 		if not manual_progress:
-			var start_dist : float = start.global_position.distance_to(Global.player.global_position)
-			var end_dist : float = end.global_position.distance_to(Global.player.global_position)
+			var start_dist : float = start.global_position.distance_to(track_object.global_position)
+			var end_dist : float = end.global_position.distance_to(track_object.global_position)
 			var length : float = start.global_position.distance_to(end.global_position)
 			var distance_difference_normalized = (start_dist - end_dist) / length
 			progress = distance_difference_normalized / 2.0 + 0.5

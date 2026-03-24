@@ -31,6 +31,8 @@ var bump_disabled = true
 var drag_timeout = 0.2
 var drag_time = 0.0
 
+var listener : Node3D
+
 func _ready():
 	for child in get_children():
 		child.bus = "SFX"
@@ -95,7 +97,7 @@ func _process(delta):
 	
 	if dragging and not bump_disabled:
 		drag_time += delta
-		if parent.is_in_group("bugged") and drag_time > DRAG_DISABLE_TIME and parent.global_position.distance_to(Global.player.global_position) > DRAG_DISABLE_DISTANCE: 
+		if parent.is_in_group("bugged") and drag_time > DRAG_DISABLE_TIME and parent.global_position.distance_to(listener.global_position) > DRAG_DISABLE_DISTANCE: 
 			parent.linear_velocity = Vector3.ZERO
 		
 		drag.volume_db = linear_to_db(clamp((magnitude - MIN_VELOCITY) / max_slide_velocity, 0.0, 1.0) * drag.vol_modifier)
