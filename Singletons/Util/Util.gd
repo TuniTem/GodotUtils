@@ -65,11 +65,14 @@ func rect_from_center(position : Vector2, size : Vector2) -> Rect2:
 		size
 	)
 
-## Recursively returns all children of the specified node, the [param data] parameter is used for recursion and should not be set
-func get_all_children(node : Node, data : Array = []):
+## Recursively returns all children of the specified nodet
+func get_all_children(node : Node):
+	_get_all_children_recursive(node)
+
+func _get_all_children_recursive(node : Node, data : Array = []):
 	data.push_back(node)
 	for child in node.get_children():
-		data = get_all_children(child, data)
+		data = _get_all_children_recursive(child, data)
 	
 	return data
 
