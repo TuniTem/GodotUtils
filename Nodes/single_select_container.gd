@@ -14,7 +14,7 @@ var last_selected_node : Control
 var last_selected_id : String:
 	get():
 		if last_selected_node != null:
-			return last_selected_node.name
+			return last_selected_node.name.to_lower()
 		else:
 			return ""
 
@@ -24,11 +24,15 @@ signal selection_updated(id : String)
 func _ready() -> void:
 	var children_buttons : Array[Control]
 	if not only_use_external_buttons:
-		for child in Util.get_all_children(self)
+		for child in Util.get_all_children(self):
+			if child is Button or child is ImageButton:
+				children_buttons.append(child)
 	
-	for button : Control in external_buttons:
+	
+	for button : Control in external_buttons + children_buttons:
 		assert(button is Button or button is ImageButton)
 		button.toggle_mode = true
+		buttons.append(button)
 		if button == default_pressed:
 			button.button_pressed = true
 			last_selected_node = button

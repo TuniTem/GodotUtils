@@ -67,7 +67,7 @@ func rect_from_center(position : Vector2, size : Vector2) -> Rect2:
 
 ## Recursively returns all children of the specified nodet
 func get_all_children(node : Node):
-	_get_all_children_recursive(node)
+	return _get_all_children_recursive(node)
 
 func _get_all_children_recursive(node : Node, data : Array = []):
 	data.push_back(node)
@@ -196,9 +196,9 @@ func open_file_dialog(parent : Node, type : FileDialog.FileMode = FileDialog.Fil
 	
 	parent.add_child(dialog)
 	dialog.show()
-	await compound_signal([dialog.file_selected, dialog.canceled])
+	await compound_signal([dialog.file_selected, dialog.dir_selected, dialog.canceled])
 	File.save_var("last_dir", dialog.current_path)
-	if not dialog.current_path.contains("."):
+	if (type == FileDialog.FileMode.FILE_MODE_OPEN_FILE and not dialog.current_path.contains(".")) or (type == FileDialog.FileMode.FILE_MODE_OPEN_DIR and not DirAccess.dir_exists_absolute(dialog.current_path)):
 		dialog.queue_free()
 		return ["", ""]
 	else:
