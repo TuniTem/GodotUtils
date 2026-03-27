@@ -3,9 +3,10 @@ extends Node
 const SAVE_PATH = "user://save_data/"
 
 func _ready() -> void:
-	verify_dir(SAVE_PATH.replace("user://", ""))
+	verify_dir(SAVE_PATH)
 
 func verify_dir(path : String):
+	path = path.replace("user://", "")
 	var dir = DirAccess.open("user://")
 	if not dir.dir_exists(path):
 		var files : Array = path.split("/")
@@ -36,7 +37,15 @@ func load_var(file_name : String, on_fail = null):
 # Modified from the docs
 ## Extract all files from a ZIP archive, preserving the directories within.
 ## This acts like the "Extract all" functionality from most archive managers.
-func extract_all_from_zip(archive_path : String, output_directory_path : String):
+func extract_all_from_zip(archive_path : String, output_directory_path : String, silent : bool = true):
+	#if archive_path.contains("user://") or archive_path.contains("res://"):
+		#archive_path = ProjectSettings.globalize_path(archive_path)
+		#
+	#if output_directory_path.contains("user://") or output_directory_path.contains("res://"):
+		#output_directory_path = ProjectSettings.globalize_path(output_directory_path)
+	
+	if not silent: print("Extracting " + archive_path + " to " + output_directory_path)
+	
 	var reader = ZIPReader.new()
 	reader.open(archive_path)
 

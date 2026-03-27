@@ -80,6 +80,10 @@ func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randf_range(betwixt[0], betwixt[1])
 
+func randi_array(betwixt : Array):
+	assert(betwixt.size() == 2, "pls size 2")
+	return randi_range(betwixt[0], betwixt[1])
+
 func rand_bool() -> bool:
 	return randi_range(0, 1) == 1
 
@@ -170,7 +174,15 @@ func convert_numeric(str : String, allowed_characters : String = "") -> String:
 			out += number
 	
 	return out
+
+func is_valid_url(url : String, accept_minimal : bool = false) -> bool:
+	var regex = RegEx.new()
+	if accept_minimal:
+		regex.compile("^(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$")
+	else:
+		regex.compile("^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$")
 	
+	return regex.search(url) != null
 
 ## Opens a file dialog and returns the selected file path and name in the format [b]\[path, file\][/b].[br][br]  
 ## Supports custom file modes, extensions, directories, and titles.[br]
