@@ -76,6 +76,10 @@ func _get_all_children_recursive(node : Node, data : Array = []):
 	
 	return data
 
+func free_all_children(node : Node):
+	for child in node.get_children():
+		child.queue_free()
+
 func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randf_range(betwixt[0], betwixt[1])
@@ -126,6 +130,11 @@ func between(value : Variant, lower : Variant, upper : Variant) -> bool:
 
 ## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
 func wait(time : float):
+	return get_tree().create_timer(time).timeout
+	#return
+
+## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
+func sleep(time : float):
 	return get_tree().create_timer(time).timeout
 	#return
 
@@ -183,6 +192,26 @@ func is_valid_url(url : String, accept_minimal : bool = false) -> bool:
 		regex.compile("^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$")
 	
 	return regex.search(url) != null
+
+func limit_string(str: String, max : int, delimiator : String = "…", from_start : bool = false, add_whitespace : bool = false, whitespace_char : String = " ") -> String:
+	var length : int = str.length()
+	var output_string : String = str
+	
+	if length > max:
+		if from_start:
+			output_string = delimiator + str.right(max - 1)
+		else:
+			output_string = str.left(max - 1) + delimiator
+		
+	elif add_whitespace:
+		if from_start:
+			output_string = str.rpad(max, whitespace_char)
+		else:
+			output_string = str.lpad(max, whitespace_char)
+	
+	
+	return output_string
+	
 
 ## Opens a file dialog and returns the selected file path and name in the format [b]\[path, file\][/b].[br][br]  
 ## Supports custom file modes, extensions, directories, and titles.[br]
