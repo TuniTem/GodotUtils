@@ -3,11 +3,12 @@ extends TextureRect
 
 @export var pressed_color_mult : Color = Color.GRAY
 @export var toggle_mode : bool = false
-@export var toggle_mode_default : bool = false
+#@export var toggle_mode_default : bool = false
 @onready var button: Button = $Button
 
 var original_color : Color
-var toggled : bool 
+@export var button_pressed : bool = false
+
 
 signal button_down
 signal button_up
@@ -18,8 +19,8 @@ func _ready() -> void:
 		button.button_down.connect(_update.bind(true))
 		button.button_up.connect(_update.bind(false))
 	else:
-		toggled = toggle_mode_default
-		#_update(toggled)
+		pass
+		#_update(button_pressed)
 	
 	button.pressed.connect(_on_button_pressed)
 	original_color = self_modulate
@@ -27,8 +28,8 @@ func _ready() -> void:
 func _on_button_pressed():
 	pressed.emit()
 	if toggle_mode:
-		toggled = not toggled
-		_update(toggled)
+		button_pressed = not button_pressed
+		_update(button_pressed)
 
 func _update(on : bool):
 	if on: 

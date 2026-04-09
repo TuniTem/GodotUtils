@@ -21,6 +21,9 @@ var goal_target = Vector3.ZERO
 @export var grav_modifier_curve : Curve
 @export var grav_modifier_effect : float = 0.1
 
+var visibility : float = 1.0
+var base : Vector3 = Vector3.ZERO
+
 func _ready():
 	var count = round(distance / division_length)
 	for i in range(count):
@@ -29,7 +32,7 @@ func _ready():
 	
 
 func _process(delta: float):
-	get_active_material(0).albedo_color.a = lerp(get_active_material(0).albedo_color.a, float(Global.player.is_chirping), delta * TRANSPARENCY_TRANSSITION_SPEED)
+	get_active_material(0).albedo_color.a = lerp(get_active_material(0).albedo_color.a, visibility, delta * TRANSPARENCY_TRANSSITION_SPEED)
 
 
 
@@ -39,7 +42,6 @@ func _physics_process(delta: float):
 	mesh.clear_surfaces()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	#var base = Global.player.position + Global.player.get_node("trail").position.rotated(Vector3.UP, Global.player.position)
-	var base = to_local(Global.player.get_node("trail").global_position)
 	points[0] = base
 	
 	

@@ -62,17 +62,28 @@ func rect_from_center(position : Vector2, size : Vector2) -> Rect2:
 		size
 	)
 
-## Recursively returns all children of the specified node, the [param data] parameter is used for recursion and should not be set
-func get_all_children(node : Node, data : Array = []):
+## Recursively returns all children of the specified nodet
+func get_all_children(node : Node):
+	return _get_all_children_recursive(node)
+
+func _get_all_children_recursive(node : Node, data : Array = []):
 	data.push_back(node)
 	for child in node.get_children():
-		data = get_all_children(child, data)
+		data = _get_all_children_recursive(child, data)
 	
 	return data
+
+func free_all_children(node : Node):
+	for child in node.get_children():
+		child.queue_free()
 
 func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randf_range(betwixt[0], betwixt[1])
+
+func randi_array(betwixt : Array):
+	assert(betwixt.size() == 2, "pls size 2")
+	return randi_range(betwixt[0], betwixt[1])
 
 func rand_bool() -> bool:
 	return randi_range(0, 1) == 1
@@ -116,6 +127,11 @@ func between(value : Variant, lower : Variant, upper : Variant) -> bool:
 
 ## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
 func wait(time : float):
+	return get_tree().create_timer(time).timeout
+	#return
+
+## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
+func sleep(time : float):
 	return get_tree().create_timer(time).timeout
 	#return
 
@@ -164,6 +180,34 @@ func convert_numeric(str : String, allowed_characters : String = "") -> String:
 			out += number
 	
 	return out
+
+func is_valid_url(url : String, accept_minimal : bool = false) -> bool:
+	var regex = RegEx.new()
+	if accept_minimal:
+		regex.compile("^(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$")
+	else:
+		regex.compile("^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$")
+	
+	return regex.search(url) != null
+
+func limit_string(str: String, max : int, delimiator : String = "…", from_start : bool = false, add_whitespace : bool = false, whitespace_char : String = " ") -> String:
+	var length : int = str.length()
+	var output_string : String = str
+	
+	if length > max:
+		if from_start:
+			output_string = delimiator + str.right(max - 1)
+		else:
+			output_string = str.left(max - 1) + delimiator
+		
+	elif add_whitespace:
+		if from_start:
+			output_string = str.rpad(max, whitespace_char)
+		else:
+			output_string = str.lpad(max, whitespace_char)
+	
+	
+	return output_string
 	
 
 ## Opens a file dialog and returns the selected file path and name in the format [b]\[path, file\][/b].[br][br]  
@@ -190,9 +234,9 @@ func open_file_dialog(parent : Node, type : FileDialog.FileMode = FileDialog.Fil
 	
 	parent.add_child(dialog)
 	dialog.show()
-	await compound_signal([dialog.file_selected, dialog.canceled])
+	await compound_signal([dialog.file_selected, dialog.dir_selected, dialog.canceled])
 	File.save_var("last_dir", dialog.current_path)
-	if not dialog.current_path.contains("."):
+	if (type == FileDialog.FileMode.FILE_MODE_OPEN_FILE and not dialog.current_path.contains(".")) or (type == FileDialog.FileMode.FILE_MODE_OPEN_DIR and not DirAccess.dir_exists_absolute(dialog.current_path)):
 		dialog.queue_free()
 		return ["", ""]
 	else:
@@ -317,7 +361,7 @@ func projectile_aim_assist3d(
 			if difference_degrees < max_pull_angle_degrees * intercept[1] \
 			and (\
 				not raycast_visibility_check \
-				or not shoot_raycast3d_global(projectile_global_position, intercept[2], RayMode.IS_COLLIDING, false, false, false, true, Global.players, true)
+				#or not shoot_raycast3d_global(projectile_global_position, intercept[2], RayMode.IS_COLLIDING, false, false, false, true, Global.players, true)
 			):
 				canidates.append({
 					"intercept_direction" : intercept[0], 
@@ -383,7 +427,7 @@ func shoot_raycast3d_global(
 	raycast.collide_with_areas = collide_with_areas
 	raycast.collide_with_bodies = collide_with_bodies
 	
-	if debug_draw_vector : Debug.draw_vector3(to, from)
+	#if debug_draw_vector : Debug.draw_vector3(to, from)
 	
 	var result : Dictionary = space_state.intersect_ray(raycast)
 	print(result)
