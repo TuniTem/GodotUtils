@@ -1,9 +1,6 @@
 extends Node
 ## Singleton used to extend godot's features
 
-
-
-
 const COARSE_EPSILON : float = 0.01
 const EPSILON : float  = 0.001
 const FINE_EPSILON : float  = 0.00001
