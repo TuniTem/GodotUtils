@@ -3,3 +3,4 @@
 [resource]
 resource_local_to_scene = true
 shading_mode = 0
+stencil_flags = 2

@@ -77,6 +77,9 @@ func free_all_children(node : Node):
 	for child in node.get_children():
 		child.queue_free()
 
+func is_child_of(test_parent : Node, test_child : Node):
+	return test_child in get_all_children(test_parent) 
+
 func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randf_range(betwixt[0], betwixt[1])
@@ -260,7 +263,6 @@ func run_every(num_runs : int = 10, parent : Node = self, identifier : String = 
 	
 	return false
 
-
 func convert_hms(time : int) -> Array[int]:
 	var hours : int = time / 3600
 	var mins : int = (time % 3600) / 60
@@ -288,6 +290,10 @@ func tween(object : Object, property : NodePath, final_val : Variant, time : flo
 	var _tween : Tween = create_tween()
 	_tween.tween_property(object, property, final_val, time).set_ease(easing).set_trans(trans).set_delay(delay)
 	return _tween
+
+
+
+
 
 func cooldown(id : String, time : float) -> bool:
 	if not _cooldowns.has(id) or TIME - _cooldowns[id] > time:
@@ -443,7 +449,33 @@ func shoot_raycast3d_global(
 	
 	elif mode == RayMode.IS_COLLIDING: return false
 	else: return null
+
+
+func noise(offset : float, seed : Variant = 0, scale : float = 100.0, amplitude : float = 1.0, depth : int = 6) -> float:
+	var rng : RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = hash(seed)
 	
+	var max_height : float = 0.0
+	var mults : Array[Array]
+	for i in range(depth):
+		mults.append([
+			rng.randf_range(-1.0, 1.0) * scale,
+			rng.randf_range(-1.0, 1.0),
+			rng.randf_range(0.0, TAU)
+		])
+		max_height += abs(mults[-1][1])
+		
+	
+	var out : float = 0.0
+	
+	for mult : Array in mults:
+		out += sin((offset + mult[2]) * mult[0]) * mult[1]
+	
+	return out * amplitude / max_height
+
+func noise_between(offset : float, minimum : float = -1.0, maximum = 1.0, seed : Variant = 0, scale : float = 100.0, depth : int = 6) -> float:
+	return remap(noise(offset, seed, scale, 1.0, depth), -1.0, 1.0, minimum, maximum)
+
 
 # Breathing variables
 
