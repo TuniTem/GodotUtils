@@ -1,15 +1,37 @@
 @tool
 extends Node2D
+class_name DrawTicks
 
-@export var COLOR : Color = Color(1.0, 1.0, 1.0, 1.0)
-@export var RADIUS : float = 400
-@export var MAX_LENGTH : float = 20
-@export var LINE_MULT : Array = [1.0, 0.75, 0.3]
-@export var ARC : Array = [PI, PI + PI / 2.0]
-@export var NUM_LARGE_TICKS : int = 5
+@export var COLOR : Color = Color(1.0, 1.0, 1.0, 1.0): 
+	set(val): 
+		COLOR = val
+		queue_redraw()
 
-func _process(delta: float) -> void:
-	queue_redraw()
+@export var RADIUS : float = 400: 
+	set(val): 
+		RADIUS = val
+		queue_redraw()
+
+@export var MAX_LENGTH : float = 20: 
+	set(val): 
+		MAX_LENGTH = val
+		queue_redraw()
+
+@export var LINE_MULT : Array = [1.0, 0.75, 0.3]: 
+	set(val): 
+		LINE_MULT = val
+		queue_redraw()
+
+@export var ARC : Array = [PI, PI + PI / 2.0]: 
+	set(val): 
+		ARC = val
+		queue_redraw()
+
+@export var NUM_LARGE_TICKS : int = 5: 
+	set(val): 
+		NUM_LARGE_TICKS = val
+		queue_redraw()
+
 
 func _draw() -> void:
 	var arc_size : float = ARC[0] - ARC[1]

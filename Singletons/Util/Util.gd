@@ -80,6 +80,27 @@ func free_all_children(node : Node):
 func is_child_of(test_parent : Node, test_child : Node):
 	return test_child in get_all_children(test_parent) 
 
+func empty(): return
+
+func round_to(value : float, place : float) -> float:
+	return snapped(value, place)
+
+func round_to_string(value : float, place : float, trailing_zeros : bool = true) -> String:
+	var rounded_value : float = snapped(value, place)
+	var rounded_string : String = str(rounded_value)
+	
+	if not trailing_zeros or place > 1.0: return rounded_string
+	
+	var to_loop : Array = range(round(-log(place)))
+	to_loop.reverse()
+	
+	for i in to_loop:
+		if roundi(rounded_value * pow(10, i + 1)) % 10 == 0:
+			rounded_string += "0"
+		else: break
+	
+	return rounded_string
+
 func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randf_range(betwixt[0], betwixt[1])
@@ -270,6 +291,19 @@ func convert_hms(time : int) -> Array[int]:
 	
 	return [hours, mins, sec]
 
+func convert_metric(value : float, return_decimal : bool = true) -> Dictionary:
+	const START = 0.000000001
+	const UNITS = ["n", "u", "m", "", "k", "M", "G", "T", "P"]
+	var negative : bool = value < 0.0
+	var test_val : float = START
+	for unit : String in UNITS:
+		if (negative and value > -test_val * 1000.0) or (not negative and value < test_val * 1000.0):
+			return {"unit" : unit, "value" : round(value / test_val) if not return_decimal or value > test_val * 100.0 else round_to(value / test_val, 0.1)}
+		
+		test_val *= 1000.0
+	
+	return {"unit" : "", "value" : value}
+
 func create_temp_unique_id() -> int:
 	return _uid_generator.create_unique_id()
 
@@ -292,7 +326,8 @@ func tween(object : Object, property : NodePath, final_val : Variant, time : flo
 	return _tween
 
 
-
+func project_to_polar(point : Vector2, surface_radius : float):
+	return point.y * Vector2.from_angle(point.x / surface_radius * TAU)
 
 
 func cooldown(id : String, time : float) -> bool:
@@ -322,6 +357,12 @@ func cooldown_timeleft_string(id : String, time : float) -> String:
 		str(converted[2]) + "s"
 	)
 
+# this is normal!
+func rotate_to_normal(global_transform : Transform3D, normal : Vector3) -> Transform3D:
+	global_transform.basis.y = normal
+	global_transform.basis.x = -global_transform.basis.z.cross(normal)
+	global_transform.basis = global_transform.basis.orthonormalized()
+	return global_transform
 
 # Input Groups
 func set_input_group(to : String):
