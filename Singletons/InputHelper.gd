@@ -59,6 +59,14 @@ const CONTROLLER_ALIASES : Dictionary[String, Controller] = {
 
 const UNKNOWN_BUTTON_TEXTURE : Texture2D = preload("res://GodotUtils/Art/ButtonIcons/Keyboard/question.png")
 
+signal new_hold_action(action_id : String)
+signal hold_action_finished
+
+var _hold_actions : Dictionary[String, Dictionary] = {}
+
+func _process(delta: float) -> void:
+	check_hold_actions()
+
 func get_icon(icon : String, controller : Controller = Controller.KEYBOARD, outline : bool = false) -> Texture2D:
 	var location : String = ICON_FOLDER + CONTROLLER_BUTTON_LOCATIONS[controller] + icon
 	var out : Texture2D = UNKNOWN_BUTTON_TEXTURE
@@ -80,3 +88,32 @@ func get_icon_string(string : String) -> Texture2D:
 	if split.size() > 2 and split[2] == "o": outline = true
 	
 	return get_icon(key, CONTROLLER_ALIASES[controller_id], outline)
+
+func get_last_hold_action_progress() -> float:
+	if _hold_actions.keys().size() != 0:
+		return get_hold_action_progress(_hold_actions.keys()[-1])
+	else: return -1.0
+
+
+func get_hold_action_progress(action_id : String) -> float:
+	if _hold_actions.has(action_id):
+		var info : Dictionary = _hold_actions[action_id]
+		return clamp((Util.TIME - info["start_time"]) / info["confirm_time"], 0.0, 1.0)
+	
+	else:
+		return -1.0
+
+func check_hold_actions():
+	for action : String in _hold_actions.keys():
+		var info : Dictionary = _hold_actions[action]
+		if Util.TIME - info["start_time"] > info["confirm_time"]:
+			info["callback"].call()
+			_hold_actions.erase(action)
+
+func stop_hold_action(action_id : String):
+	if _hold_actions.has(action_id): 
+		_hold_actions.erase(action_id)
+
+func start_hold_action(action_id : String, confirm_time : float, callback : Callable):
+	_hold_actions[action_id] = {"start_time": Util.TIME, "confirm_time": confirm_time, "callback": callback}
+	new_hold_action.emit(action_id)

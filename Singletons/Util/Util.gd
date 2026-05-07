@@ -5,6 +5,7 @@ const COARSE_EPSILON : float = 0.01
 const EPSILON : float  = 0.001
 const FINE_EPSILON : float  = 0.00001
 const FINEST_EPSILON : float  = 0.000000001
+const THREAD_TIMEOUT_TIME = 60.0
 
 const _EPSILON_ARR : Array = [COARSE_EPSILON, EPSILON, FINE_EPSILON, FINEST_EPSILON]
 
@@ -28,7 +29,7 @@ signal input_group_changed(to : String)
 var TIME : float = 0.0
 var active_promises : Array[Promise]
 var input_group : String = "default"
-
+var quit_thread_flag : int = 0
 
 var _breathe_properties : Dictionary[Array, Dictionary] = {}
 var _breathe_methods : Dictionary[Callable, Dictionary] = {}
@@ -38,6 +39,8 @@ var _uid_generator : UniqueIdentifierGenerator = UniqueIdentifierGenerator.new()
 var _smooth_hide_colors : Dictionary[CanvasItem, Color]
 var _cooldowns : Dictionary[String, float]
 
+var _thread : Thread = Thread.new()
+var _thread_timeout : float = 0.0
 
 # [Object, property] : {
 #    "init" : float
@@ -127,6 +130,25 @@ func find_file_at_dir(path : String, file_name : String) -> String:
 			return file
 	
 	return ""
+
+# use the function below in a loop to handle timeout correctly
+# if Util.quit_thread_flag == get_instance_id(): return
+func queue_thread(callable : Callable, args : Array = [], custom_timeout : float = -1.0, priority : Thread.Priority = Thread.Priority.PRIORITY_NORMAL) -> Variant:
+	while _thread.is_alive():
+		await get_tree().process_frame
+	
+	_thread.start(callable.bindv(args), priority)
+	_thread_timeout = THREAD_TIMEOUT_TIME if custom_timeout == -1.0 else custom_timeout 
+	while _thread.is_alive() and _thread_timeout > 0.0: 
+		_thread_timeout -= get_process_delta_time()
+		await get_tree().process_frame
+	
+	if _thread_timeout <= 0.0: 
+		Debug.push("Thread timed out: " + str(callable), Debug.ALERT)
+		quit_thread_flag = callable.get_object().get_instance_id()
+		return null
+	else:
+		return _thread.wait_to_finish()
 
 ## Preforms a serach on an [Array] of [Array]s or [Dictionary]s, [param index] is the index to search in the sub-array/dictionary, [param key] is the value it's checking for.[br][br]
 ## Returns the array dictionary that has [param key] at [param index], or [param on_fail] if nothing is found.[br][br]

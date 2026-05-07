@@ -15,11 +15,12 @@ enum {
 @export var console: RichTextLabel
 @export var console_container: VBoxContainer
 @export var command: LineEdit
+@export var track_container: MarginContainer
 
 var line_count = 0
 var console_fade_timer = 0.0
 
-var debug_mode : bool = false
+var debug_mode : bool = true
 
 var TAGS = [
 	[DEFAULT, Color(1,1,1,0.5).to_html()], 
@@ -111,6 +112,9 @@ func _update_list():
 	_update()
 		
 
+func set_track_scale(to : float):
+	track_container.scale = Vector2.ONE * to
+
 func track(object : Node, track_string : String, print : bool = false, tag : String = "", is_func = false):
 	var out = {
 		"tag": "",
@@ -120,8 +124,8 @@ func track(object : Node, track_string : String, print : bool = false, tag : Str
 		"parameter": "",
 		"callable": null,
 		"print": print
-		}
-		
+	}
+	
 	if tag != "": out["tag"] = tag
 	else: out["tag"] = track_string
 	

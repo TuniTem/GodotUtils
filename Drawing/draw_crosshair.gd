@@ -1,5 +1,5 @@
 @tool
-class_name DrawCrosshair extends Node2D
+class_name DrawCrosshair extends Control
 
 @onready var crosshair_anims: AnimationPlayer = $CrosshairAnims
 
@@ -8,6 +8,7 @@ class_name DrawCrosshair extends Node2D
 @export var square : bool 
 @export var circle : bool 
 @export var dot : bool 
+@export var progress : bool 
 
 @export_category("general")
 @export var AUTO_CENTER : bool = false
@@ -59,11 +60,22 @@ class_name DrawCrosshair extends Node2D
 @export_range(0.0, 1.0) var DOT_ALPHA : float = 1.0
 @export var DOT_IGNORE_FLASH : bool = false
 
+@export_category("progress")
+@export_range(0.0, 1.0, 0.001) var progress_value : float = 0.33
+@export var PROGRESS_RADIUS : float = 70.0
+@export var PROGRESS_WIDTH : float = 5.0
+@export var PROGRESS_START_OFFSET : float = 0.0
+@export var PROGRESS_COLOR : Color = Color.WHITE
+@export var PROGRESS_FADE_IN : bool = true
+@export_range(0.0, 1.0, 0.001) var FADE_IN_VALUE: float = 0.33
+@export var PROGRESS_IGNORE_FLASH : bool = false
+
 var transitions : Dictionary = {
 	"crosshair" : 0.0,
 	"square" : 0.0,
 	"circle" : 0.0,
-	"dot" : 0.0
+	"dot" : 0.0,
+	"progress" : 0.0
 }
 
 var curr_color : Color = Color.WHITE
@@ -76,7 +88,7 @@ func _process(delta: float) -> void:
 				transitions[key] = float(get(key))
 	
 	if AUTO_CENTER:
-		position = get_viewport_rect().size / 2.0
+		position = DisplayServer.window_get_size() / 2.0
 	else:
 		position = Vector2.ZERO
 	
@@ -147,7 +159,16 @@ func _draw() -> void:
 	
 	if transitions["dot"] != 0.0:
 		draw_circle(Vector2.ZERO, DOT_SIZE * transitions["dot"], Color(COLOR, COLOR.a * DOT_ALPHA) if DOT_IGNORE_FLASH else Color(curr_color, curr_color.a * DOT_ALPHA), true, -1, true)
-
+	
+	if transitions["progress"] != 0.0:
+		var start_pos : float = PROGRESS_START_OFFSET
+		var end_pos : float = PROGRESS_START_OFFSET + lerp(0.0, TAU, progress_value)
+		var alpha_mult : float = clamp(progress_value * (1.0 / FADE_IN_VALUE), 0.0, 1.0) if PROGRESS_FADE_IN else 1.0
+		var color : Color = PROGRESS_COLOR
+		color.a *= alpha_mult * transitions["progress"]
+		
+		draw_arc(Vector2.ZERO, PROGRESS_RADIUS * transitions["progress"], start_pos, end_pos, 128,  color, PROGRESS_WIDTH * transitions["progress"], true)
+	
 func flash(intensity : float = 1.0, color : Color = FLASH_COLOR):
 	curr_color = color * intensity
 
