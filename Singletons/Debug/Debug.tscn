@@ -28,6 +28,7 @@ command = NodePath("Console/CommandBG/HBoxContainer/LineEdit")
 track_container = NodePath("MarginContainer")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1171674641]
+visible = false
 z_index = 7
 layout_mode = 1
 offset_right = 40.0

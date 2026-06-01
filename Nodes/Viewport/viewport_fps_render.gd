@@ -25,10 +25,10 @@ func _process(delta: float) -> void:
 		fps_timer += delta
 		if fps_timer > spf:
 			fps_timer -= spf
-			render_target_update_mode = SubViewport.UPDATE_ALWAYS
+			render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 		
 		else:
 			render_target_update_mode = SubViewport.UPDATE_DISABLED
 		
 	else:
-		render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
