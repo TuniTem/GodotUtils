@@ -65,9 +65,11 @@ class_name DrawCrosshair extends Control
 @export var PROGRESS_RADIUS : float = 70.0
 @export var PROGRESS_WIDTH : float = 5.0
 @export var PROGRESS_START_OFFSET : float = 0.0
+
 @export var PROGRESS_COLOR : Color = Color.WHITE
 @export var PROGRESS_FADE_IN : bool = true
 @export_range(0.0, 1.0, 0.001) var FADE_IN_VALUE: float = 0.33
+@export_range(0.0, 1.0, 0.001) var PROGRESS_FADE_IN_BUFFER : float = 0.0
 @export var PROGRESS_IGNORE_FLASH : bool = false
 
 var transitions : Dictionary = {
@@ -162,8 +164,8 @@ func _draw() -> void:
 	
 	if transitions["progress"] != 0.0:
 		var start_pos : float = PROGRESS_START_OFFSET
-		var end_pos : float = PROGRESS_START_OFFSET + lerp(0.0, TAU, progress_value)
-		var alpha_mult : float = clamp(progress_value * (1.0 / FADE_IN_VALUE), 0.0, 1.0) if PROGRESS_FADE_IN else 1.0
+		var end_pos : float = PROGRESS_START_OFFSET + lerp(0.0, TAU, progress_value if progress_value > PROGRESS_FADE_IN_BUFFER else 0.0)
+		var alpha_mult : float = clamp(progress_value * (1.0 / (FADE_IN_VALUE + PROGRESS_FADE_IN_BUFFER)), 0.0, 1.0) if PROGRESS_FADE_IN else 1.0
 		var color : Color = PROGRESS_COLOR
 		color.a *= alpha_mult * transitions["progress"]
 		

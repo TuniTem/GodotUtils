@@ -112,6 +112,12 @@ func randi_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
 	return randi_range(betwixt[0], betwixt[1])
 
+func max_index(arr : Array) -> int:
+	return arr.size() - 1
+
+func index_wrap(value : int, arr : Array) -> int:
+	return wrapi(value, 0, max_index(arr))
+
 func rand_bool() -> bool:
 	return randi_range(0, 1) == 1
 
