@@ -7,7 +7,7 @@ uniform vec4 dark : source_color;
 uniform float bright_thresh : hint_range(0.0, 1.0) = 0.6;
 uniform float medium_thresh : hint_range(0.0, 1.0) = 0.3;
 
-uniform int pixel_size : hint_range(1, 64) = 2;
+uniform float pixel_size = 2;
 
 uniform float alpha : hint_range(0.0, 1.0) = 1.0;
 uniform float brightness : hint_range(0.0, 1.0) = 1.0;

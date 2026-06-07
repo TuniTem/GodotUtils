@@ -1,38 +1,82 @@
 extends Node
 
-const SAVE_PATH = "user://save_data/"
+const SAVE_PATH = "user://local_data/"
+const WORLD_SAVE_PATH = "user://worlds/"
 
 func _ready() -> void:
 	verify_dir(SAVE_PATH)
+	verify_dir(WORLD_SAVE_PATH)
 
 func verify_dir(path : String):
-	path = path.replace("user://", "")
-	var dir = DirAccess.open("user://")
-	if not dir.dir_exists(path):
-		var files : Array = path.split("/")
-		var curr_dir = files.pop_front()
-		for file in files:
-			dir.make_dir(curr_dir)
-			curr_dir = curr_dir + "/" + file
-		
-		#Debug.push("Created directory: " + path, Debug.INFO)
-		
+	path = ProjectSettings.globalize_path(path)
+	DirAccess.make_dir_recursive_absolute(path)
 
 func save_var(file_name : String, variable : Variant):
 	var file := FileAccess.open(SAVE_PATH + file_name + ".var", FileAccess.WRITE)
-	file.store_var(variable)
+	file.store_var(variable, true)
 	file.close()
 	
 
 func load_var(file_name : String, on_fail = null):
 	var file := FileAccess.open(SAVE_PATH + file_name + ".var", FileAccess.READ)
 	if file:
-		var data = file.get_var()
+		var data = file.get_var(true)
 		file.close()
 		return data
 	else:
 		#Debug.push("requested file " + file_name + ".var does not exist, returning default")
 		return on_fail
+
+func save_node(file_name : String, node : Node):
+	var packed : PackedScene = PackedScene.new()
+	packed.pack(node)
+	ResourceSaver.save(packed, SAVE_PATH + file_name + ".tscn")
+
+func load_node(file_name : String, on_fail : PackedScene = PackedScene.new()):
+	var path : String = SAVE_PATH + file_name + ".tscn"
+	if not FileAccess.file_exists(path):
+		return on_fail.instantiate()
+	
+	var scene : PackedScene = ResourceLoader.load(path, "PackedScene")
+	return scene.instantiate()
+	
+
+func world_save_var(world : String, section : String, file_name : String, variable : Variant):
+	var full_path : String = WORLD_SAVE_PATH + world.validate_filename() + "/" + section + "/"
+	verify_dir(full_path)
+	
+	var file := FileAccess.open(full_path + file_name + ".var", FileAccess.WRITE)
+	file.store_var(variable, true)
+	file.close()
+
+func world_load_var(world : String, section : String, file_name : String, on_fail = null):
+	var full_path : String = WORLD_SAVE_PATH + world.validate_filename() + "/" + section + "/"
+	var file := FileAccess.open(full_path + file_name + ".var", FileAccess.READ)
+	print(full_path + " file err ", file.get_error())
+	if file.get_error() == Error.OK:
+		var data = file.get_var(true)
+		file.close()
+		print("data: ", data)
+		return data
+	else:
+		Debug.push("requested file " + file_name + ".var does not exist, returning default")
+		return on_fail
+
+func world_save_node(world : String, section : String, file_name : String, node : Node):
+	var full_path : String = WORLD_SAVE_PATH + world.validate_filename() + "/" + section + "/"
+	verify_dir(full_path)
+	
+	var packed : PackedScene = PackedScene.new()
+	packed.pack(node)
+	ResourceSaver.save(packed, full_path + file_name + ".tscn")
+
+func world_load_node(world : String, section : String, file_name : String, on_fail : PackedScene = PackedScene.new()):
+	var full_path : String = WORLD_SAVE_PATH + world.validate_filename() + "/" + section + "/" + file_name + ".tscn"
+	if not FileAccess.file_exists(full_path): return on_fail.instantiate()
+	
+	var scene : PackedScene = ResourceLoader.load(full_path, "PackedScene")
+	if not scene: return on_fail.instantiate()
+	return scene.instantiate()
 
 # Modified from the docs
 ## Extract all files from a ZIP archive, preserving the directories within.

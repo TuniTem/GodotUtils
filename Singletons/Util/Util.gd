@@ -25,6 +25,7 @@ enum RayMode {
 signal input_group_changed(to : String)
 
 @export var ref_3d: Node3D
+@export var banished_node_parent: Node3D
 
 var TIME : float = 0.0
 var active_promises : Array[Promise]
@@ -353,7 +354,18 @@ func tween(object : Object, property : NodePath, final_val : Variant, time : flo
 	_tween.tween_property(object, property, final_val, time).set_ease(easing).set_trans(trans).set_delay(delay)
 	return _tween
 
-
+func fade_in_modulate(object : CanvasItem, time : float, force_start : bool = false) -> Tween:
+	var _tween : Tween = create_tween()
+	if force_start: object.modulate.a = 0.0
+	_tween.tween_property(object, "modulate:a", 1.0, time)
+	return _tween
+	
+func fade_out_modulate(object : CanvasItem, time : float, force_start : bool = false) -> Tween:
+	var _tween : Tween = create_tween()
+	if force_start: object.modulate.a = 1.0
+	_tween.tween_property(object, "modulate:a", 0.0, time)
+	return _tween
+	
 func project_to_polar(point : Vector2, surface_radius : float):
 	return point.y * Vector2.from_angle(point.x / surface_radius * TAU)
 
@@ -677,7 +689,49 @@ func change_bus_volume_linear(bus: String, change : float, clamp_min : float = 0
 	AudioServer.set_bus_volume_linear(AudioServer.get_bus_index(bus), set_vol)
 	return set_vol
 
+var _banished_nodes : Dictionary[String, Dictionary] = {
+	
+}
 
+func banish_node(node : Node, recall_id : String):
+	_banished_nodes[recall_id] = {
+		"original_parent" : node.get_parent(),
+		"node" : node,
+		"process_mode" : node.process_mode,
+		"position" : node.position if "position" in node else null
+	}
+	
+	node.process_mode = PROCESS_MODE_DISABLED
+	node.reparent(banished_node_parent)
+
+func is_valid_recall_id(recall_id : String) -> bool:
+	return _banished_nodes.has(recall_id) 
+
+func recall_node(recall_id : String, instance_on_fail : PackedScene = null) -> Node:
+	if is_valid_recall_id(recall_id):
+		var node_info : Dictionary = _banished_nodes[recall_id].duplicate(true)
+		_banished_nodes.erase(recall_id)
+		var node : Node = node_info["node"]
+		node.reparent(node_info["original_parent"])
+		if node_info["position"] != null: node.position = node_info["position"]
+		node.process_mode = node_info["process_mode"]
+		
+		return node_info["node"]
+	
+	elif instance_on_fail != null:
+		return instance_on_fail.instantiate()
+	
+	return Node.new()
+
+func get_banished_node(recall_id : String, on_fail : Node = null) -> Node:
+	if is_valid_recall_id(recall_id):
+		return _banished_nodes[recall_id]["node"]
+		
+	elif on_fail != null:
+		return on_fail
+	
+	return Node.new()
+	
 # Float comparason
 # Note: these funcs don't use each other in order to run quicker
 ## checks if [param a] == [param b], accounting for a customizable [param epsilon] index

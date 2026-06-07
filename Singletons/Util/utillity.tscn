@@ -2,9 +2,15 @@
 
 [ext_resource type="Script" uid="uid://bmosmc3hxh233" path="res://GodotUtils/Singletons/Util/Util.gd" id="1_cdiel"]
 
-[node name="Utillity" type="Node" unique_id=1522769427 node_paths=PackedStringArray("ref_3d")]
+[node name="Utillity" type="Node" unique_id=1522769427 node_paths=PackedStringArray("ref_3d", "banished_node_parent")]
 script = ExtResource("1_cdiel")
 ref_3d = NodePath("Ref3D")
+banished_node_parent = NodePath("BanishedNodes")
 
 [node name="Ref3D" type="Node3D" parent="." unique_id=326734859]
 unique_name_in_owner = true
+
+[node name="BanishedNodes" type="Node3D" parent="." unique_id=1652795237]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10000, 10000, 10000)
+visible = false
