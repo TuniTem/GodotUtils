@@ -63,6 +63,7 @@ signal new_hold_action(action_id : String)
 signal hold_action_finished
 
 var _hold_actions : Dictionary[String, Dictionary] = {}
+var _double_tap_actions : Dictionary[String, Dictionary] = {}
 
 func _process(delta: float) -> void:
 	check_hold_actions()
@@ -120,3 +121,11 @@ func stop_hold_action(action_id : String) -> bool:
 func start_hold_action(action_id : String, confirm_time : float, callback : Callable):
 	_hold_actions[action_id] = {"start_time": Util.TIME, "confirm_time": confirm_time, "callback": callback}
 	new_hold_action.emit(action_id)
+
+func check_double_tap(action_id : String, confirm_time : float = Global.double_click_time) -> bool:
+	if _double_tap_actions.has(action_id) and abs(Util.TIME - _double_tap_actions[action_id]["start_time"]) <= _double_tap_actions[action_id]["confirm_time"]:
+		_double_tap_actions.erase(action_id)
+		return true
+	
+	_double_tap_actions[action_id] = {"start_time": Util.TIME, "confirm_time": confirm_time}
+	return false

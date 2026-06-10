@@ -14,6 +14,7 @@ uniform float brightness : hint_range(0.0, 1.0) = 1.0;
 uniform float red_bias : hint_range(0.0, 10.0) = 0.0;
 
 
+
 void fragment() {
 	vec2 screenUV = UV;
 	vec2 resolution = vec2(textureSize(TEXTURE, 0));
@@ -30,7 +31,7 @@ void fragment() {
 	} else {
 		pixelColor = dark;
 	}
-	pixelColor.a = alpha;
+	pixelColor.a *= alpha;
 	COLOR = pixelColor;
 }
 

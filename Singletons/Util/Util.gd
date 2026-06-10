@@ -354,13 +354,13 @@ func tween(object : Object, property : NodePath, final_val : Variant, time : flo
 	_tween.tween_property(object, property, final_val, time).set_ease(easing).set_trans(trans).set_delay(delay)
 	return _tween
 
-func fade_in_modulate(object : CanvasItem, time : float, force_start : bool = false) -> Tween:
+func fade_in_modulate(object : CanvasItem, time : float = 1.0, force_start : bool = false) -> Tween:
 	var _tween : Tween = create_tween()
 	if force_start: object.modulate.a = 0.0
 	_tween.tween_property(object, "modulate:a", 1.0, time)
 	return _tween
 	
-func fade_out_modulate(object : CanvasItem, time : float, force_start : bool = false) -> Tween:
+func fade_out_modulate(object : CanvasItem, time : float = 1.0, force_start : bool = false) -> Tween:
 	var _tween : Tween = create_tween()
 	if force_start: object.modulate.a = 1.0
 	_tween.tween_property(object, "modulate:a", 0.0, time)
@@ -376,6 +376,10 @@ func cooldown(id : String, time : float) -> bool:
 		return true
 	
 	return false
+
+func reset_cooldown(id : String):
+	if _cooldowns.has(id):
+		_cooldowns[id] = 0.0
 
 func cooldown_timeleft(id : String, time : float) -> float:
 	if _cooldowns.has(id):
@@ -715,6 +719,8 @@ func recall_node(recall_id : String, instance_on_fail : PackedScene = null) -> N
 		node.reparent(node_info["original_parent"])
 		if node_info["position"] != null: node.position = node_info["position"]
 		node.process_mode = node_info["process_mode"]
+		if "_recall" in node:
+			node.call("_recall")
 		
 		return node_info["node"]
 	
