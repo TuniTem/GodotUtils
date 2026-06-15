@@ -8,7 +8,18 @@ const FINEST_EPSILON : float  = 0.000000001
 const THREAD_TIMEOUT_TIME = 60.0
 
 const _EPSILON_ARR : Array = [COARSE_EPSILON, EPSILON, FINE_EPSILON, FINEST_EPSILON]
-
+const FILE_CHARACTER_REPLACEMENT : Dictionary[String, String] = {
+	":" : "：",
+	"/" : "／",
+	"\\" : "＼",
+	"?" : "？",
+	"*" : "＊",
+	"\"" : "'",
+	"|" : "｜",
+	"%" : "％",
+	"<" : "＜",
+	">" : "＞"
+}
 
 enum BreatheMode {
 	ADD,
@@ -104,6 +115,12 @@ func round_to_string(value : float, place : float, trailing_zeros : bool = true)
 		else: break
 	
 	return rounded_string
+
+func validate_filename(filename : String) -> String:
+	for character in FILE_CHARACTER_REPLACEMENT.keys():
+		filename = filename.replace(character, FILE_CHARACTER_REPLACEMENT[character])
+	
+	return filename
 
 func randf_array(betwixt : Array):
 	assert(betwixt.size() == 2, "pls size 2")
@@ -296,6 +313,9 @@ func open_file_dialog(parent : Node, type : FileDialog.FileMode = FileDialog.Fil
 		var out = [dialog.current_path, dialog.current_file]
 		dialog.queue_free()
 		return out
+
+func open_explorer_to_file(file_path : String):
+	OS.execute("CMD.exe", ["/C", "explorer /select," + ProjectSettings.globalize_path(file_path).replace("/", "\\")])
 
 ## Executes an action once every [param num_runs] calls for a given [param parent].[br]
 ## Returns [code]true[/code] if the interval is reached, otherwise [code]false[/code].[br][br]
