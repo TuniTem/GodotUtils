@@ -131,23 +131,19 @@ func create_new_zip_file(path : String):
 	packer.close()
 
 func append_file_to_zip(path : String, content : Variant, file_name : String, params : Array = []):
-	print("b")
 	var data : PackedByteArray
 	match typeof(content):
 		TYPE_STRING:
 			data = content.to_utf8_buffer()
 		
 		TYPE_OBJECT:
-			print("c")
 			if content is Image:
-				print("d")
 				if file_name.ends_with(".png"): data = content.save_png_to_buffer()
 				if file_name.ends_with(".jpg"): data = content.save_jpg_to_buffer(0.75 if params.size() == 0 else params[0])
 		_:
 			data = var_to_bytes(content)
 		
 	if data.is_empty(): return
-	print("e")
 	var packer : ZIPPacker = ZIPPacker.new()
 	packer.compression_level = 6
 	packer.open(path, ZIPPacker.APPEND_ADDINZIP)

@@ -26,7 +26,6 @@ var zip_location : String:
 	get(): return TELEMETRY_PATH + current_session + ".zip"
 var active : bool = false
 
-
 func _process(delta: float) -> void:
 	if sesion_timer >= 0.0 and active:
 		sesion_timer += delta
@@ -39,10 +38,14 @@ func _process(delta: float) -> void:
 			record("avg_fps", average_fps)
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST and active and active_session:
-		get_tree().set_auto_accept_quit(false)
-		stop_session()
-		get_tree().quit()
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		if active and active_session:
+			get_tree().set_auto_accept_quit(false)
+			stop_session()
+			get_tree().quit()
+		
+		else:
+			get_tree().quit()
 
 func start_session(title : String = ""):
 	if not active: return
