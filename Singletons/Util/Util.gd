@@ -144,6 +144,7 @@ func rand_bool() -> bool:
 
 func rand_on_unit_sphere() -> Vector3:
 	return Vector3(randfn(0, 1), randfn(0, 1), randfn(0, 1)).normalized()
+	
 
 func find_file_at_dir(path : String, file_name : String) -> String:
 	if not path.ends_with("/") : path += "/"
@@ -716,16 +717,14 @@ func change_bus_volume_linear(bus: String, change : float, clamp_min : float = 0
 	AudioServer.set_bus_volume_linear(AudioServer.get_bus_index(bus), set_vol)
 	return set_vol
 
-var _banished_nodes : Dictionary[String, Dictionary] = {
-	
-}
+var _banished_nodes : Dictionary[String, Dictionary] = {}
 
 func banish_node(node : Node, recall_id : String):
 	_banished_nodes[recall_id] = {
 		"original_parent" : node.get_parent(),
 		"node" : node,
 		"process_mode" : node.process_mode,
-		"position" : node.position if "position" in node else null
+		"transform" : node.transform if "transform" in node else null
 	}
 	
 	node.process_mode = PROCESS_MODE_DISABLED
@@ -740,7 +739,7 @@ func recall_node(recall_id : String, instance_on_fail : PackedScene = null) -> N
 		_banished_nodes.erase(recall_id)
 		var node : Node = node_info["node"]
 		node.reparent(node_info["original_parent"])
-		if node_info["position"] != null: node.position = node_info["position"]
+		if node_info["transform"] != null: node.transform = node_info["transform"]
 		node.process_mode = node_info["process_mode"]
 		if "_recall" in node:
 			node.call("_recall")
@@ -760,6 +759,11 @@ func get_banished_node(recall_id : String, on_fail : Node = null) -> Node:
 		return on_fail
 	
 	return Node.new()
+
+func pivot_point(point : Vector2, pivot : Vector2, angle : float):
+	var diff = point - pivot
+	var rotated_vector = diff.rotated(angle) + pivot
+	return rotated_vector
 
 # Float comparason
 # Note: these funcs don't use each other in order to run quicker

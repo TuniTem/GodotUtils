@@ -1,0 +1,43 @@
+[gd_resource type="Shader" format=3 uid="uid://cy0qujxtimy0"]
+
+[resource]
+code = "shader_type canvas_item;
+
+uniform float xstrech : hint_range(1.0, 3.0, 0.001) = 1.77777;
+uniform float global_scale : hint_range(0.1, 10.0, 0.001) = 1.0;
+uniform float global_speed : hint_range(0.1, 10.0, 0.001) = 1.0;
+
+
+group_uniforms NoiseOne;
+uniform sampler2D noise1 : repeat_enable;
+uniform vec3 color1 : source_color;
+uniform float scale1 : hint_range(0.1, 1.0, 0.001) = 1.0;
+uniform vec2 speed1 = vec2(1.0);
+uniform float weight1 : hint_range(0.0, 2.0, 0.001) = 1.0;
+
+group_uniforms NoiseTwo;
+uniform sampler2D noise2 : repeat_enable;
+uniform vec3 color2 : source_color;
+uniform float scale2 : hint_range(0.1, 1.0, 0.001) = 1.0;
+uniform vec2 speed2 = vec2(1.0);
+uniform float weight2 : hint_range(0.0, 2.0, 0.001) = 1.0;
+
+group_uniforms NoiseThree;
+uniform sampler2D noise3 : repeat_enable;
+uniform vec3 color3 : source_color;
+uniform float scale3 : hint_range(0.1, 1.0, 0.001) = 1.0;
+uniform vec2 speed3 = vec2(1.0);
+uniform float weight3 : hint_range(0.0, 2.0, 0.001) = 1.0;
+
+void fragment() {
+	vec2 uv = UV;
+	uv.x *= xstrech;
+	float one = texture(noise1, uv * scale1 * global_scale + speed1 * TIME / 10.0 * global_speed).r * weight1;
+	float two = texture(noise2, uv * scale2 * global_scale + speed2 * TIME / 10.0 * global_speed).r * weight2;
+	float three = texture(noise3, uv * scale3 * global_scale + speed3 * TIME / 10.0 * global_speed).r * weight3;
+	float maximum = max(max(one, two), three);
+	if(one == maximum){COLOR.rgb = color1;} 
+	else if(two == maximum){COLOR.rgb = color2;}
+	else {COLOR.rgb = color3;}
+}
+"

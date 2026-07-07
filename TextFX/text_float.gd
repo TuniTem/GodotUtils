@@ -1,11 +1,14 @@
+@tool
 extends RichTextEffect
 class_name FloatEffect
 var bbcode := "float"
 # Format: [spacefloat amp=8 rot_amp=6 min_speed=0.4 max_speed=1.2]
+
 func _process_custom_fx(char_fx: CharFXTransform) -> bool:
 	#if Engine.is_editor_hint():
 		#return true
-	var t: float = Util.TIME
+	var t: float = float(Engine.get_frames_drawn()) / 144.0 if Engine.is_editor_hint() else Util.TIME
+	t = round(t * 6.0) / 6.0
 	var idx: int = char_fx.relative_index
 
 	var seed: int = int(char_fx.env.get("seed", 1337))
