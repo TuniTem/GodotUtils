@@ -204,6 +204,10 @@ func wait(time : float):
 	return get_tree().create_timer(time).timeout
 	#return
 
+func animation_finished(animation : AnimationPlayer):
+	if animation.is_playing():
+		await compound_signal([animation.animation_finished, animation.animation_changed])
+
 ## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
 func sleep(time : float):
 	return get_tree().create_timer(time).timeout
