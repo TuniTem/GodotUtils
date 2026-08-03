@@ -11,14 +11,14 @@ func verify_dir(path : String):
 	path = ProjectSettings.globalize_path(path)
 	DirAccess.make_dir_recursive_absolute(path)
 
-func save_var(file_name : String, variable : Variant):
-	var file := FileAccess.open(SAVE_PATH + file_name + ".var", FileAccess.WRITE)
+func save_var(file_name : String, variable : Variant, custom_path : String = ""):
+	var file := FileAccess.open((SAVE_PATH + file_name + ".var") if custom_path == "" else custom_path + "/" + file_name + ".var", FileAccess.WRITE)
 	file.store_var(variable, true)
 	file.close()
 	
 
-func load_var(file_name : String, on_fail = null):
-	var file := FileAccess.open(SAVE_PATH + file_name + ".var", FileAccess.READ)
+func load_var(file_name : String, on_fail = null, custom_path : String = ""):
+	var file := FileAccess.open((SAVE_PATH + file_name + ".var") if custom_path == "" else custom_path + "/" + file_name + ".var", FileAccess.READ)
 	if file:
 		var data = file.get_var(true)
 		file.close()

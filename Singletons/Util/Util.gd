@@ -144,7 +144,6 @@ func rand_bool() -> bool:
 
 func rand_on_unit_sphere() -> Vector3:
 	return Vector3(randfn(0, 1), randfn(0, 1), randfn(0, 1)).normalized()
-	
 
 func find_file_at_dir(path : String, file_name : String) -> String:
 	if not path.ends_with("/") : path += "/"
@@ -204,14 +203,14 @@ func wait(time : float):
 	return get_tree().create_timer(time).timeout
 	#return
 
-func animation_finished(animation : AnimationPlayer):
-	if animation.is_playing():
-		await compound_signal([animation.animation_finished, animation.animation_changed])
-
 ## Pauses the function it is called in for a set amount of [param time], must be called with [code]await[/code]
 func sleep(time : float):
 	return get_tree().create_timer(time).timeout
 	#return
+
+func animation_finished(animation : AnimationPlayer):
+	if animation.is_playing():
+		await compound_signal([animation.animation_finished, animation.animation_changed])
 
 ## Combines an [Array] of [Signal]s into a single signal using a [Promise].[br][br]
 ## The returned signal emits when the specified [param mode] condition is met (when any or all signals complete).  
@@ -768,6 +767,41 @@ func pivot_point(point : Vector2, pivot : Vector2, angle : float):
 	var diff = point - pivot
 	var rotated_vector = diff.rotated(angle) + pivot
 	return rotated_vector
+
+# From https://www.reddit.com/r/godot/comments/18bfn0n/comment/l058v0v
+func get_node_aabb(node : Node3D = null, ignore_top_level : bool = true, bounds_transform : Transform3D = Transform3D()) -> AABB:
+	var box : AABB
+	var transform : Transform3D
+
+	# we are going down the child chain, we want the aabb of each subsequent node to be on the same axis as the parent
+	if bounds_transform.is_equal_approx(Transform3D()):
+		transform = node.global_transform
+	else:
+		transform = bounds_transform
+	
+	# no more nodes. return default aabb
+	if node == null:
+		return AABB(Vector3(-0.2, -0.2, -0.2), Vector3(0.4, 0.4, 0.4))
+	# makes sure the transform we get isn't distorted
+	var top_xform : Transform3D = transform.affine_inverse() * node.global_transform
+
+	# convert the node into visualinstance3D to access get_aabb() function.
+	var visual_result : VisualInstance3D = node as VisualInstance3D
+	if visual_result != null:
+		box = visual_result.get_aabb()
+	else:
+		box = AABB()
+	
+	# xforms the transform with the box aabb for proper alignment I believe?
+	box = top_xform * box
+	# recursion
+	for i : int in node.get_child_count():
+		var child : Node3D = node.get_child(i) as Node3D
+		if child && !(ignore_top_level && child.top_level):
+			var child_box : AABB = get_node_aabb(child, ignore_top_level, transform)
+			box = box.merge(child_box)
+	
+	return box
 
 # Float comparason
 # Note: these funcs don't use each other in order to run quicker
