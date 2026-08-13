@@ -720,6 +720,70 @@ func change_bus_volume_linear(bus: String, change : float, clamp_min : float = 0
 	AudioServer.set_bus_volume_linear(AudioServer.get_bus_index(bus), set_vol)
 	return set_vol
 
+enum GameDisplay {
+	WINDOWED,
+	FULLSCREEN,
+	BORDERLESS,
+	WINDOWED_MAXIMIZED,
+	FULLSCREEN_EXCLUSIVE,
+	BORDERLESS_MAXIMIZED,
+}
+
+var game_windowed_resolution : Vector2i
+var current_display : GameDisplay
+
+func toggle_fullscreen(borderless_windowed : bool = false, boarderless_fullscreen : bool = true):
+	match current_display:
+		GameDisplay.WINDOWED, GameDisplay.BORDERLESS, GameDisplay.WINDOWED_MAXIMIZED:
+			set_game_display(GameDisplay.BORDERLESS_MAXIMIZED if boarderless_fullscreen else GameDisplay.FULLSCREEN)
+		
+		GameDisplay.FULLSCREEN, GameDisplay.FULLSCREEN_EXCLUSIVE, GameDisplay.BORDERLESS_MAXIMIZED:
+			set_game_display(GameDisplay.BORDERLESS if borderless_windowed else GameDisplay.WINDOWED)
+
+func set_game_windowed_resolution(to : Vector2i):
+	game_windowed_resolution = to
+
+func set_game_display(to : GameDisplay):
+	current_display = to
+	
+	var window : Window = get_window()
+	var current_screen : int = DisplayServer.window_get_current_screen(window.get_window_id())
+	window.borderless = false
+	window.unresizable = false
+	match current_display:
+		GameDisplay.WINDOWED:
+			window.mode = Window.MODE_WINDOWED
+			window.size = game_windowed_resolution
+			window.position = Vector2(DisplayServer.screen_get_position(current_screen)) + DisplayServer.screen_get_size(current_screen) / 2.0 - window.size / 2.0
+		
+		GameDisplay.WINDOWED_MAXIMIZED:
+			window.mode = Window.MODE_WINDOWED
+			var decorations_offset: Vector2i = window.position - window.get_position_with_decorations()
+			window.size = DisplayServer.screen_get_size(current_screen) - decorations_offset
+			window.position = DisplayServer.screen_get_position(current_screen) + decorations_offset
+
+		GameDisplay.BORDERLESS:
+			window.mode = Window.MODE_WINDOWED
+			window.borderless = true
+			window.unresizable = true
+			window.size = game_windowed_resolution
+			window.position = Vector2(DisplayServer.screen_get_position(current_screen)) + DisplayServer.screen_get_size(current_screen) / 2.0 - window.size / 2.0
+		
+		GameDisplay.BORDERLESS_MAXIMIZED:
+			window.mode = Window.MODE_WINDOWED
+			window.borderless = true
+			window.unresizable = true
+			window.size = DisplayServer.screen_get_size(current_screen)
+			window.position = DisplayServer.screen_get_position(current_screen)
+		
+		GameDisplay.FULLSCREEN: 
+			window.mode = Window.MODE_FULLSCREEN
+			window.unresizable = true
+			
+		GameDisplay.FULLSCREEN_EXCLUSIVE: 
+			window.mode = Window.MODE_EXCLUSIVE_FULLSCREEN
+			window.unresizable = true
+
 var _banished_nodes : Dictionary[String, Dictionary] = {}
 
 func banish_node(node : Node, recall_id : String):

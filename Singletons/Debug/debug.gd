@@ -53,6 +53,9 @@ var tracked_collision_shapes : Array[CollisionShape3D]
 var prev_collision_shape_dimentions : Dictionary[CollisionShape3D, Array]
 var tracked_collision_shape_colors : Dictionary[CollisionShape3D, Color]
 var all_collision_draws_active : bool = false
+var game_display_shortcuts : bool = false
+var window_drag_pos : Vector2i = -Vector2i.ONE
+var window_offset : Vector2i
 
 const DEBUG_DRAW_MATERIAL = preload("res://GodotUtils/Singletons/Debug/debug_vector_material.tres")
 
@@ -82,6 +85,10 @@ func _process(delta: float):
 	
 	_update_tracked_collision_shapes()
 	
+	if game_display_shortcuts and window_drag_pos != -Vector2i.ONE:
+		var window : Window = get_window()
+		window.position = window_drag_pos + DisplayServer.mouse_get_position() - window_offset
+
 func _update():
 	for value in tracked_values:
 		if not value["object"]:
@@ -114,6 +121,8 @@ func _update_list():
 
 func set_track_scale(to : float):
 	track_container.scale = Vector2.ONE * to
+
+
 
 func track(object : Node, track_string : String, print : bool = false, tag : String = "", is_func = false):
 	var out = {
@@ -388,6 +397,8 @@ func set_freecam(to : bool):
 			
 		set_game_pause(false)
 
+func set_game_display_shortcuts(to : bool):
+	game_display_shortcuts = to
 
 func _input(event: InputEvent) -> void:
 	if not Debug.debug_mode: return
@@ -406,4 +417,20 @@ func _input(event: InputEvent) -> void:
 			
 			KEY_BACKSLASH:
 				set_freecam(not is_instance_valid(camera))
-					
+				
+			KEY_F11:
+				if game_display_shortcuts:
+					Util.toggle_fullscreen(true)
+			
+	elif event is InputEventMouseButton and event.is_pressed():
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if DisplayServer.mouse_get_mode() == DisplayServer.MOUSE_MODE_VISIBLE and game_display_shortcuts and Input.is_key_pressed(KEY_SHIFT):
+					window_drag_pos = get_window().position
+					window_offset = DisplayServer.mouse_get_position()
+	
+	elif event is InputEventMouseButton and not event.is_pressed():
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if window_drag_pos != -Vector2i.ONE:
+					window_drag_pos = -Vector2i.ONE
