@@ -60,6 +60,8 @@ const CONTROLLER_ALIASES : Dictionary[String, Controller] = {
 }
 
 const UNKNOWN_BUTTON_TEXTURE : Texture2D = preload("res://GodotUtils/Art/ButtonIcons/Keyboard/question.png")
+const DOUBLE_CLICK_TIME : float = 0.4
+
 
 signal new_hold_action(action_id : String)
 signal hold_action_finished
@@ -247,7 +249,7 @@ func start_hold_action(action_id : String, confirm_time : float, callback : Call
 	_hold_actions[action_id] = {"start_time": Util.TIME, "confirm_time": confirm_time, "callback": callback}
 	new_hold_action.emit(action_id)
 
-func check_double_tap(action_id : String, confirm_time : float = Global.double_click_time) -> bool:
+func check_double_tap(action_id : String, confirm_time : float = DOUBLE_CLICK_TIME) -> bool:
 	if _double_tap_actions.has(action_id) and abs(Util.TIME - _double_tap_actions[action_id]["start_time"]) <= _double_tap_actions[action_id]["confirm_time"]:
 		_double_tap_actions.erase(action_id)
 		return true

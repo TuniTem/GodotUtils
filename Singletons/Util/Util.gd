@@ -6,8 +6,8 @@ const EPSILON : float  = 0.001
 const FINE_EPSILON : float  = 0.00001
 const FINEST_EPSILON : float  = 0.000000001
 const THREAD_TIMEOUT_TIME = 60.0
-const BLANK_TEXTURE = preload("uid://w7mf1uk8wp26")
-const BLANK_TEXTURE256 = preload("uid://bm251gijytyxe")
+const BLANK_TEXTURE = preload("res://GodotUtils/Art/Blank.png")
+const BLANK_TEXTURE256 = preload("res://GodotUtils/Art/Blank256.png")
 const ZERO_WIDTH_SPACE : String = "​"
 
 const _EPSILON_ARR : Array = [COARSE_EPSILON, EPSILON, FINE_EPSILON, FINEST_EPSILON]
