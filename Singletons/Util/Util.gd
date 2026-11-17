@@ -46,6 +46,12 @@ var active_promises : Array[Promise]
 var input_group : String = "default"
 var quit_thread_flag : int = 0
 
+var window_center : Vector2:
+	get(): return get_viewport().size / 2.0
+
+var window_size : Vector2:
+	get(): return get_viewport().size
+
 var _breathe_properties : Dictionary[Array, Dictionary] = {}
 var _breathe_methods : Dictionary[Callable, Dictionary] = {}
 var _breathe_enabled : bool = false
@@ -56,6 +62,7 @@ var _cooldowns : Dictionary[String, float]
 
 var _thread : Thread = Thread.new()
 var _thread_timeout : float = 0.0
+
 
 # [Object, property] : {
 #    "init" : float
